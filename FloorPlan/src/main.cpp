@@ -1,12 +1,12 @@
 #include "floorplan.h"
 #include <algorithm>
-#include <iostream>
+#include <chrono>
+#include <cmath>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 #include <unordered_map>
-#include <cmath>
-#include <chrono>
 using namespace std;
 
 namespace {
@@ -16,8 +16,7 @@ const int TIME_LIMIT_SECONDS = 3500;
 struct TimeLimit {
     Clock::time_point deadline;
 
-    explicit TimeLimit(std::chrono::seconds budget)
-        : deadline(Clock::now() + budget) {}
+    explicit TimeLimit(std::chrono::seconds budget) : deadline(Clock::now() + budget) {}
 
     bool expired() const {
         return Clock::now() >= deadline;
@@ -57,8 +56,7 @@ AdaptiveSaConfig make_adaptive_sa_config(const Floorplan& fp) {
     cfg.batch = max(64, min(256, nmods * 4));
     cfg.min_batches = max(500, min(1600, complexity * 12));
     cfg.patience_batches = max(400, min(2000, complexity * 16));
-    cfg.max_batches = max(cfg.min_batches + cfg.patience_batches,
-                          min(6400, complexity * 48));
+    cfg.max_batches = max(cfg.min_batches + cfg.patience_batches, min(6400, complexity * 48));
 
     if (nmods < 50) {
         cfg.min_batches = max(cfg.min_batches, min(7000, complexity * 110));
@@ -82,13 +80,16 @@ bool best_seed_for_case(const Floorplan& fp, unsigned int& seed) {
     }
     return false;
 }
-}
+} // namespace
 
 // ─── Input parser ─────────────────────────────────────────────────────────
 
 void parse_input(const string& filename, Floorplan& fp) {
     ifstream fin(filename);
-    if (!fin) { cerr << "Cannot open " << filename << "\n"; exit(1); }
+    if (!fin) {
+        cerr << "Cannot open " << filename << "\n";
+        exit(1);
+    }
 
     string line;
     // First line: "NumBlocks: N"
@@ -106,12 +107,14 @@ void parse_input(const string& filename, Floorplan& fp) {
 
     // Read symmetry groups
     while (getline(fin, line)) {
-        if (line.empty()) continue;
+        if (line.empty())
+            continue;
         if (line.find("Symmetry Group") != string::npos) {
             SymGroup grp;
             grp.type = SYM_VERT; // default; SA may flip
             while (getline(fin, line)) {
-                if (line.empty()) break;
+                if (line.empty())
+                    break;
                 // Peek ahead: if "Symmetry Group" appears, stop and re-process
                 if (line.find("Symmetry Group") != string::npos) {
                     // Push back — handle by re-entering outer loop
@@ -124,7 +127,8 @@ void parse_input(const string& filename, Floorplan& fp) {
                 istringstream iss(line);
                 string tok1, tok2;
                 iss >> tok1;
-                if (!iss) continue;
+                if (!iss)
+                    continue;
                 iss >> tok2;
                 if (!iss || tok2.empty()) {
                     // Self-symmetric module
@@ -157,7 +161,10 @@ string format_coord(double v) {
 
 void write_output(const string& filename, const Floorplan& fp) {
     ofstream fout(filename);
-    if (!fout) { cerr << "Cannot open " << filename << "\n"; exit(1); }
+    if (!fout) {
+        cerr << "Cannot open " << filename << "\n";
+        exit(1);
+    }
 
     vector<double> out_x(fp.mods.size());
     vector<double> out_y(fp.mods.size());
@@ -203,7 +210,8 @@ void write_output(const string& filename, const Floorplan& fp) {
             }
         }
 
-        if (!have_axis || !valid_axis) continue;
+        if (!have_axis || !valid_axis)
+            continue;
 
         for (int mid : grp.selfsym) {
             if (axis_type == SYM_VERT)
@@ -215,8 +223,8 @@ void write_output(const string& filename, const Floorplan& fp) {
 
     for (int id = 0; id < (int)fp.mods.size(); id++) {
         const Module& m = fp.mods[id];
-        fout << m.name << " " << format_coord(out_x[id]) << " "
-             << format_coord(out_y[id]) << " " << m.rot << "\n";
+        fout << m.name << " " << format_coord(out_x[id]) << " " << format_coord(out_y[id]) << " "
+             << m.rot << "\n";
     }
 }
 
@@ -229,12 +237,10 @@ void run_adaptive_sa(Floorplan& fp, unsigned int seed = 12345,
     const double STAGE2_DIVISOR = 100.0;
     const int STAGE2_ITERS = 7;
     AdaptiveSaConfig cfg = make_adaptive_sa_config(fp);
-    auto timed_out = [&]() {
-        return time_limit != nullptr && time_limit->expired();
-    };
+    auto timed_out = [&]() { return time_limit != nullptr && time_limit->expired(); };
 
     fp.pack();
-    double cur_cost  = fp.cost();
+    double cur_cost = fp.cost();
     double best_cost = cur_cost;
 
     // Best state storage (separate from fp.save() used for rollback)
@@ -266,11 +272,10 @@ void run_adaptive_sa(Floorplan& fp, unsigned int seed = 12345,
         sample_cnt++;
         fp.restore();
     }
-    double avg_uphill = (uphill_cnt > 0) ? (sum_uphill / uphill_cnt)
-                                         : max(1.0, (double)cur_cost * 0.05);
-    double avg_delta_norm = clamp_fast_sa_delta(
-        (sum_abs_delta / max(1, sample_cnt)) / max(1.0, (double)cur_cost)
-    );
+    double avg_uphill =
+        (uphill_cnt > 0) ? (sum_uphill / uphill_cnt) : max(1.0, (double)cur_cost * 0.05);
+    double avg_delta_norm =
+        clamp_fast_sa_delta((sum_abs_delta / max(1, sample_cnt)) / max(1.0, (double)cur_cost));
     double T1 = max(1.0, -avg_uphill / log(INIT_ACCEPT_PROB));
 
     int no_improve_batches = 0;
@@ -283,8 +288,7 @@ void run_adaptive_sa(Floorplan& fp, unsigned int seed = 12345,
 
         double T = T1;
         if (iter > 1) {
-            double denom = (iter <= STAGE2_ITERS) ? (iter * STAGE2_DIVISOR)
-                                                  : (double)iter;
+            double denom = (iter <= STAGE2_ITERS) ? (iter * STAGE2_DIVISOR) : (double)iter;
             T = max(1e-9, T1 * avg_delta_norm / denom);
         }
 
@@ -305,13 +309,12 @@ void run_adaptive_sa(Floorplan& fp, unsigned int seed = 12345,
             batch_abs_delta += abs(delta);
             batch_moves++;
 
-            bool accept = (delta <= 0) ||
-                          (rand_unit(rng) < exp(-delta / T));
+            bool accept = (delta <= 0) || (rand_unit(rng) < exp(-delta / T));
             if (accept) {
                 cur_cost = nc;
                 if (cur_cost < best_cost) {
                     best_cost = cur_cost;
-                    best_fp   = fp;
+                    best_fp = fp;
                     improved = true;
                 }
             } else {
@@ -325,16 +328,16 @@ void run_adaptive_sa(Floorplan& fp, unsigned int seed = 12345,
         }
 
         if (batch_moves > 0) {
-            avg_delta_norm = clamp_fast_sa_delta(
-                (batch_abs_delta / batch_moves) / max(1.0, (double)cur_cost)
-            );
+            avg_delta_norm =
+                clamp_fast_sa_delta((batch_abs_delta / batch_moves) / max(1.0, (double)cur_cost));
         }
-        if (timeout) break;
+        if (timeout)
+            break;
         no_improve_batches = improved ? 0 : no_improve_batches + 1;
 
-        bool converged = (iter >= cfg.min_batches) &&
-                         (no_improve_batches >= cfg.patience_batches);
-        if (converged) break;
+        bool converged = (iter >= cfg.min_batches) && (no_improve_batches >= cfg.patience_batches);
+        if (converged)
+            break;
     }
 
     fp = best_fp;

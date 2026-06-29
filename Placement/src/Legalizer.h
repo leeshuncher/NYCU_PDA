@@ -3,8 +3,8 @@
 
 #include <chrono>
 #include <limits>
-#include <utility>
 #include <string>
+#include <utility>
 #include <vector>
 
 struct Instance {
@@ -31,12 +31,12 @@ struct Candidate {
 };
 
 class Legalizer {
-public:
-    bool readInput(const std::string &path);
+  public:
+    bool readInput(const std::string& path);
     bool legalize(double alpha, double threshold);
-    bool writeOutput(const std::string &path) const;
+    bool writeOutput(const std::string& path) const;
 
-private:
+  private:
     long long dbuPerMicron = 0;
     long long dieLLX = 0, dieLLY = 0, dieURX = 0, dieURY = 0;
     long long siteW = 0, siteH = 0;
@@ -72,17 +72,17 @@ private:
     bool runtimeLimitHit = false;
     std::chrono::steady_clock::time_point runtimeDeadline;
 
-    int targetRow(const Instance &cell) const;
-    int targetSite(const Instance &cell, int widthSites) const;
+    int targetRow(const Instance& cell) const;
+    int targetSite(const Instance& cell, int widthSites) const;
     void buildRows();
     void buildSiteOwnerGrid();
     void buildDensityGrid();
     bool snapInitialLegalize(double alpha);
     bool abacusInitialLegalize(double alpha);
-    std::vector<std::pair<int, int>> packAbacusSubrow(const std::vector<int> &cellIdxs,
-                                                      const Interval &interval) const;
-    double packedSubrowCost(const std::vector<std::pair<int, int>> &packed,
-                            int row, double alpha) const;
+    std::vector<std::pair<int, int>> packAbacusSubrow(const std::vector<int>& cellIdxs,
+                                                      const Interval& interval) const;
+    double packedSubrowCost(const std::vector<std::pair<int, int>>& packed, int row,
+                            double alpha) const;
     std::vector<int> candidateSitesInRow(int row, int target, int widthSites) const;
     bool canPlaceMultiRow(int row, int site, int widthSites, int heightRows) const;
     Candidate findBestCandidate(int cellIdx) const;

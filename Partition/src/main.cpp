@@ -1,5 +1,5 @@
-#include <chrono>
 #include <array>
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -10,21 +10,19 @@
 
 using namespace std;
 
-static void write_group(ofstream &out, const string &label, const vector<cell> &cells, const vector<int> &cell_ids)
-{
+static void write_group(ofstream& out, const string& label, const vector<cell>& cells,
+                        const vector<int>& cell_ids) {
     out << label << ' ' << cell_ids.size() << "\n";
     for (int cid : cell_ids)
         out << cells[cid].name << ' ';
     out << ";\n";
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char** argv) {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    if (argc != 3)
-    {
+    if (argc != 3) {
         cerr << "Usage: ./Lab1 <input file name> <output file name>\n";
         return 1;
     }
@@ -32,8 +30,7 @@ int main(int argc, char **argv)
     const string inputFile = argv[1];
     const string outputFile = argv[2];
 
-    try
-    {
+    try {
         auto parsed = parse_input(inputFile);
         const auto deadline = chrono::steady_clock::now() + chrono::seconds(3000);
 
@@ -41,19 +38,17 @@ int main(int argc, char **argv)
 
         array<vector<int>, 3> groups;
         const array<string, 3> labels = {"G1", "G2", "G3"};
-        for (auto &group : groups)
+        for (auto& group : groups)
             group.reserve(parsed.cells.size());
 
-        for (int cid = 0; cid < static_cast<int>(parsed.cells.size()); cid++)
-        {
+        for (int cid = 0; cid < static_cast<int>(parsed.cells.size()); cid++) {
             const int gid = static_cast<int>(result.part[cid]);
             if (gid >= 0 && gid < static_cast<int>(groups.size()))
                 groups[gid].push_back(cid);
         }
 
         ofstream out(outputFile);
-        if (!out.is_open())
-        {
+        if (!out.is_open()) {
             cerr << "Error opening output file: " << outputFile << "\n";
             return 1;
         }
@@ -68,10 +63,10 @@ int main(int argc, char **argv)
         auto in_range = [&](int s) { return result.minSize <= s && s <= result.maxSize; };
         const bool balance_ok = in_range(s1) && in_range(s2) && in_range(s3);
         cerr << "Cutsize = " << result.cut << "\n";
-        cerr << "Balance " << (balance_ok ? "PASS" : "FAIL") << " (constraint_min=" << result.minSize << ", constraint_max=" << result.maxSize << ", G1=" << s1 << ", G2=" << s2 << ", G3=" << s3 << ")\n";
-    }
-    catch (const exception &e)
-    {
+        cerr << "Balance " << (balance_ok ? "PASS" : "FAIL")
+             << " (constraint_min=" << result.minSize << ", constraint_max=" << result.maxSize
+             << ", G1=" << s1 << ", G2=" << s2 << ", G3=" << s3 << ")\n";
+    } catch (const exception& e) {
         cerr << e.what() << "\n";
         return 1;
     }

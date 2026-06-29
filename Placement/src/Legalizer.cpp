@@ -26,7 +26,8 @@ long long ceilDiv(long long a, long long b) {
         a = -a;
         b = -b;
     }
-    if (a >= 0) return (a + b - 1) / b;
+    if (a >= 0)
+        return (a + b - 1) / b;
     return -((-a) / b);
 }
 
@@ -35,59 +36,65 @@ long long floorDiv(long long a, long long b) {
         a = -a;
         b = -b;
     }
-    if (a >= 0) return a / b;
+    if (a >= 0)
+        return a / b;
     return -((-a + b - 1) / b);
 }
 
 int gridLineLowerBound(long long value, long long low, long long high, long long step, int bins) {
-    if (value <= low) return 0;
-    if (value >= high) return bins;
+    if (value <= low)
+        return 0;
+    if (value >= high)
+        return bins;
     return static_cast<int>(min(static_cast<long long>(bins), ceilDiv(value - low, step)));
 }
 
 int gridLineUpperBound(long long value, long long low, long long high, long long step, int bins) {
-    if (value < low) return 0;
-    if (value >= high) return bins + 1;
+    if (value < low)
+        return 0;
+    if (value >= high)
+        return bins + 1;
     return static_cast<int>(min(static_cast<long long>(bins + 1), floorDiv(value - low, step) + 1));
 }
 
-bool rectOverlap(long long ax1, long long ay1, long long ax2, long long ay2,
-                 long long bx1, long long by1, long long bx2, long long by2) {
+bool rectOverlap(long long ax1, long long ay1, long long ax2, long long ay2, long long bx1,
+                 long long by1, long long bx2, long long by2) {
     return ax1 < bx2 && bx1 < ax2 && ay1 < by2 && by1 < ay2;
 }
 
-vector<string> splitTokens(const string &line) {
+vector<string> splitTokens(const string& line) {
     stringstream ss(line);
     vector<string> tokens;
     string token;
-    while (ss >> token) tokens.push_back(token);
+    while (ss >> token)
+        tokens.push_back(token);
     return tokens;
 }
 
-bool isCommentStart(const string &token) {
+bool isCommentStart(const string& token) {
     return token == "//" || (!token.empty() && token[0] == '#');
 }
 
-int columnIndex(const unordered_map<string, int> &columns, const string &name) {
+int columnIndex(const unordered_map<string, int>& columns, const string& name) {
     auto it = columns.find(name);
     return it == columns.end() ? -1 : it->second;
 }
 
-string normalizedOrient(const string &orient) {
+string normalizedOrient(const string& orient) {
     return (orient == "R0" || orient == "MX") ? orient : "R0";
 }
 
-bool parseIntegerToken(const string &token, long long &value) {
+bool parseIntegerToken(const string& token, long long& value) {
     try {
         size_t parsed = 0;
         value = stoll(token, &parsed);
         return parsed == token.size();
-    } catch (const exception &) {
+    } catch (const exception&) {
         return false;
     }
 }
 
-void printStage(const string &stage) {
+void printStage(const string& stage) {
     cout << "[Stage] " << stage << '\n';
 }
 
@@ -114,7 +121,7 @@ struct TetrisRowState {
 
 } // namespace
 
-bool Legalizer::readInput(const string &path) {
+bool Legalizer::readInput(const string& path) {
     ifstream fin(path);
     if (!fin) {
         cerr << "Cannot open input file: " << path << '\n';
@@ -134,8 +141,9 @@ bool Legalizer::readInput(const string &path) {
     while (getline(fin, line)) {
         ++lineNo;
         vector<string> parts = splitTokens(line);
-        if (parts.empty() || isCommentStart(parts[0])) continue;
-        const string &key = parts[0];
+        if (parts.empty() || isCommentStart(parts[0]))
+            continue;
+        const string& key = parts[0];
         if (key == "DBU_Per_Micron") {
             if (parts.size() < 2 || !parseIntegerToken(parts[1], dbuPerMicron)) {
                 cerr << "Invalid DBU_Per_Micron on line " << lineNo << ".\n";
@@ -168,7 +176,7 @@ bool Legalizer::readInput(const string &path) {
             for (int i = 0; i < static_cast<int>(header.size()); ++i) {
                 columns[header[i]] = i;
             }
-            for (const string &required : {"Name", "LLX", "LLY", "Width", "Height", "Type"}) {
+            for (const string& required : {"Name", "LLX", "LLY", "Width", "Height", "Type"}) {
                 if (columnIndex(columns, required) < 0) {
                     cerr << "Missing input column: " << required << '\n';
                     return false;
@@ -186,28 +194,28 @@ bool Legalizer::readInput(const string &path) {
     while (getline(fin, line)) {
         ++lineNo;
         vector<string> parts = splitTokens(line);
-        if (parts.empty() || isCommentStart(parts[0])) continue;
+        if (parts.empty() || isCommentStart(parts[0]))
+            continue;
         if (parts.size() < 6) {
             cerr << "Invalid instance row on line " << lineNo << ".\n";
             return false;
         }
 
         Instance inst;
-        auto requiredToken = [&](const string &column, string &value) -> bool {
+        auto requiredToken = [&](const string& column, string& value) -> bool {
             int idx = columnIndex(columns, column);
-            if (idx < 0 || idx >= static_cast<int>(parts.size())) return false;
+            if (idx < 0 || idx >= static_cast<int>(parts.size()))
+                return false;
             value = parts[idx];
             return true;
         };
-        auto requiredInteger = [&](const string &column, long long &value) -> bool {
+        auto requiredInteger = [&](const string& column, long long& value) -> bool {
             string token;
             return requiredToken(column, token) && parseIntegerToken(token, value);
         };
 
-        if (!requiredToken("Name", inst.name) ||
-            !requiredInteger("LLX", inst.x) ||
-            !requiredInteger("LLY", inst.y) ||
-            !requiredInteger("Width", inst.w) ||
+        if (!requiredToken("Name", inst.name) || !requiredInteger("LLX", inst.x) ||
+            !requiredInteger("LLY", inst.y) || !requiredInteger("Width", inst.w) ||
             !requiredInteger("Height", inst.h)) {
             cerr << "Invalid instance geometry on line " << lineNo << ".\n";
             return false;
@@ -215,12 +223,12 @@ bool Legalizer::readInput(const string &path) {
 
         int orientCol = columnIndex(columns, "Orient");
         int typeCol = columnIndex(columns, "Type");
-        if (orientCol >= 0 && typeCol > orientCol &&
-            parts.size() == header.size() - 1) {
+        if (orientCol >= 0 && typeCol > orientCol && parts.size() == header.size() - 1) {
             inst.orient = "R0";
             inst.type = parts[typeCol - 1];
         } else if (parts.size() == header.size()) {
-            if (orientCol >= 0) inst.orient = parts[orientCol];
+            if (orientCol >= 0)
+                inst.orient = parts[orientCol];
             inst.type = parts[typeCol];
         } else if (parts.size() == header.size() + 1 && orientCol < 0) {
             inst.orient = parts[typeCol];
@@ -288,7 +296,8 @@ bool Legalizer::legalize(double alpha, double threshold) {
     }
 
     if (tetrisOnly) {
-        if (!haveInitial) return false;
+        if (!haveInitial)
+            return false;
         printStage("Skipping Abacus initial legalization for large Tetris-only placement");
         restoreBestPlacement();
         return true;
@@ -312,7 +321,8 @@ bool Legalizer::legalize(double alpha, double threshold) {
             haveInitial = true;
         }
     }
-    if (!haveInitial) return false;
+    if (!haveInitial)
+        return false;
 
     restoreBestPlacement();
 
@@ -344,7 +354,7 @@ bool Legalizer::legalize(double alpha, double threshold) {
     return true;
 }
 
-bool Legalizer::writeOutput(const string &path) const {
+bool Legalizer::writeOutput(const string& path) const {
     ofstream fout(path);
     if (!fout) {
         cerr << "Cannot open output file: " << path << '\n';
@@ -357,22 +367,21 @@ bool Legalizer::writeOutput(const string &path) const {
         if (cells[i].orient == "MX") {
             originY += cells[i].h;
         }
-        fout << "place_cell -inst_name " << cells[i].name
-             << " -orient " << cells[i].orient
-             << " -origin {" << static_cast<double>(originX) / dbuPerMicron
-             << ' ' << static_cast<double>(originY) / dbuPerMicron << "}\n";
+        fout << "place_cell -inst_name " << cells[i].name << " -orient " << cells[i].orient
+             << " -origin {" << static_cast<double>(originX) / dbuPerMicron << ' '
+             << static_cast<double>(originY) / dbuPerMicron << "}\n";
     }
     return true;
 }
 
-int Legalizer::targetRow(const Instance &cell) const {
+int Legalizer::targetRow(const Instance& cell) const {
     long long rel = cell.y - dieLLY;
     long long rounded = floorDiv(rel + siteH / 2, siteH);
     int heightRows = max(1, static_cast<int>(ceilDiv(cell.h, siteH)));
     return static_cast<int>(max(0LL, min(static_cast<long long>(numRows - heightRows), rounded)));
 }
 
-int Legalizer::targetSite(const Instance &cell, int widthSites) const {
+int Legalizer::targetSite(const Instance& cell, int widthSites) const {
     long long rel = cell.x - dieLLX;
     long long rounded = floorDiv(rel + siteW / 2, siteW);
     return static_cast<int>(max(0LL, min(static_cast<long long>(numSites - widthSites), rounded)));
@@ -382,47 +391,53 @@ void Legalizer::buildRows() {
     rows.assign(numRows, Row());
     vector<vector<pair<int, int>>> blocked(numRows);
 
-    for (const Instance &obs : obstacles) {
+    for (const Instance& obs : obstacles) {
         long long ox1 = max(obs.x, dieLLX);
         long long oy1 = max(obs.y, dieLLY);
         long long ox2 = min(obs.x + obs.w, dieURX);
         long long oy2 = min(obs.y + obs.h, dieURY);
-        if (ox1 >= ox2 || oy1 >= oy2) continue;
+        if (ox1 >= ox2 || oy1 >= oy2)
+            continue;
 
         int rowL = static_cast<int>(max(0LL, floorDiv(oy1 - dieLLY, siteH)));
-        int rowR = static_cast<int>(min(static_cast<long long>(numRows), ceilDiv(oy2 - dieLLY, siteH)));
+        int rowR =
+            static_cast<int>(min(static_cast<long long>(numRows), ceilDiv(oy2 - dieLLY, siteH)));
         int siteL = static_cast<int>(max(0LL, floorDiv(ox1 - dieLLX, siteW)));
-        int siteR = static_cast<int>(min(static_cast<long long>(numSites), ceilDiv(ox2 - dieLLX, siteW)));
-        if (siteL >= siteR) continue;
+        int siteR =
+            static_cast<int>(min(static_cast<long long>(numSites), ceilDiv(ox2 - dieLLX, siteW)));
+        if (siteL >= siteR)
+            continue;
         for (int r = rowL; r < rowR; ++r) {
             long long rowY1 = dieLLY + static_cast<long long>(r) * siteH;
             long long rowY2 = rowY1 + siteH;
             if (rectOverlap(dieLLX + static_cast<long long>(siteL) * siteW, rowY1,
-                            dieLLX + static_cast<long long>(siteR) * siteW, rowY2,
-                            ox1, oy1, ox2, oy2)) {
+                            dieLLX + static_cast<long long>(siteR) * siteW, rowY2, ox1, oy1, ox2,
+                            oy2)) {
                 blocked[r].push_back({siteL, siteR});
             }
         }
     }
 
     for (int r = 0; r < numRows; ++r) {
-        auto &b = blocked[r];
+        auto& b = blocked[r];
         sort(b.begin(), b.end());
         int cur = 0;
         for (auto [l, rr] : b) {
             l = max(l, 0);
             rr = min(rr, numSites);
-            if (l > cur) rows[r].freeSites.push_back({cur, l});
+            if (l > cur)
+                rows[r].freeSites.push_back({cur, l});
             cur = max(cur, rr);
         }
-        if (cur < numSites) rows[r].freeSites.push_back({cur, numSites});
+        if (cur < numSites)
+            rows[r].freeSites.push_back({cur, numSites});
     }
 }
 
 void Legalizer::buildSiteOwnerGrid() {
     siteOwner.assign(static_cast<size_t>(numRows) * numSites, -2);
     for (int r = 0; r < numRows; ++r) {
-        for (const auto &seg : rows[r].freeSites) {
+        for (const auto& seg : rows[r].freeSites) {
             for (int s = seg.l; s < seg.r; ++s) {
                 siteOwner[static_cast<size_t>(r) * numSites + s] = -1;
             }
@@ -440,20 +455,26 @@ void Legalizer::buildDensityGrid() {
     long long dieW = dieURX - dieLLX;
     long long dieH = dieURY - dieLLY;
     constexpr double kEdgeBlockageSpanRatio = 0.999;
-    for (const Instance &obs : obstacles) {
-        if (obs.type != "BLOCKAGE") continue;
+    for (const Instance& obs : obstacles) {
+        if (obs.type != "BLOCKAGE")
+            continue;
         long long x1 = max(obs.x, dieLLX);
         long long y1 = max(obs.y, dieLLY);
         long long x2 = min(obs.x + obs.w, dieURX);
         long long y2 = min(obs.y + obs.h, dieURY);
-        if (x1 >= x2 || y1 >= y2) continue;
+        if (x1 >= x2 || y1 >= y2)
+            continue;
 
         bool spansDieWidth = static_cast<double>(x2 - x1) / dieW >= kEdgeBlockageSpanRatio;
         bool spansDieHeight = static_cast<double>(y2 - y1) / dieH >= kEdgeBlockageSpanRatio;
-        if (y1 <= dieLLY && spansDieWidth) gridLLY = max(gridLLY, y2);
-        if (y2 >= dieURY && spansDieWidth) gridURY = min(gridURY, y1);
-        if (x1 <= dieLLX && spansDieHeight) gridLLX = max(gridLLX, x2);
-        if (x2 >= dieURX && spansDieHeight) gridURX = min(gridURX, x1);
+        if (y1 <= dieLLY && spansDieWidth)
+            gridLLY = max(gridLLY, y2);
+        if (y2 >= dieURY && spansDieWidth)
+            gridURY = min(gridURY, y1);
+        if (x1 <= dieLLX && spansDieHeight)
+            gridLLX = max(gridLLX, x2);
+        if (x2 >= dieURX && spansDieHeight)
+            gridURX = min(gridURX, x1);
     }
     if (gridLLX >= gridURX || gridLLY >= gridURY) {
         gridLLX = dieLLX;
@@ -473,7 +494,7 @@ bool Legalizer::snapInitialLegalize(double alpha) {
 
     vector<int> order(cells.size());
     for (int i = 0; i < static_cast<int>(cells.size()); ++i) {
-        const Instance &cell = cells[i];
+        const Instance& cell = cells[i];
         int widthSites = max(1, static_cast<int>(ceilDiv(cell.w, siteW)));
         int heightRows = max(1, static_cast<int>(ceilDiv(cell.h, siteH)));
         cellWidthSites[i] = widthSites;
@@ -482,7 +503,8 @@ bool Legalizer::snapInitialLegalize(double alpha) {
             cerr << "Cell is larger than the legal area: " << cell.name << '\n';
             return false;
         }
-        if (heightRows != 1) return false;
+        if (heightRows != 1)
+            return false;
         order[i] = i;
     }
 
@@ -494,9 +516,12 @@ bool Legalizer::snapInitialLegalize(double alpha) {
     }
 
     stable_sort(order.begin(), order.end(), [&](int a, int b) {
-        if (targetSites[a] != targetSites[b]) return targetSites[a] < targetSites[b];
-        if (targetRows[a] != targetRows[b]) return targetRows[a] < targetRows[b];
-        if (cells[a].x != cells[b].x) return cells[a].x < cells[b].x;
+        if (targetSites[a] != targetSites[b])
+            return targetSites[a] < targetSites[b];
+        if (targetRows[a] != targetRows[b])
+            return targetRows[a] < targetRows[b];
+        if (cells[a].x != cells[b].x)
+            return cells[a].x < cells[b].x;
         return a < b;
     });
 
@@ -518,25 +543,26 @@ bool Legalizer::snapInitialLegalize(double alpha) {
         return states;
     };
 
-    auto maxRemainingRun = [&](const TetrisRowState &state, int row) {
+    auto maxRemainingRun = [&](const TetrisRowState& state, int row) {
         int best = 0;
         int cursor = state.cursor;
         for (size_t i = state.interval; i < rows[row].freeSites.size(); ++i) {
-            const Interval &seg = rows[row].freeSites[i];
+            const Interval& seg = rows[row].freeSites[i];
             int start = max(cursor, seg.l);
-            if (start < seg.r) best = max(best, seg.r - start);
+            if (start < seg.r)
+                best = max(best, seg.r - start);
             cursor = 0;
         }
         return best;
     };
 
-    auto firstTetrisFit = [&](const TetrisRowState &state, int row, int target, int widthSites,
+    auto firstTetrisFit = [&](const TetrisRowState& state, int row, int target, int widthSites,
                               bool preserveTargetGaps) {
         int bestSite = -1;
         int bestDistance = numeric_limits<int>::max();
         int cursor = state.cursor;
         for (size_t i = state.interval; i < rows[row].freeSites.size(); ++i) {
-            const Interval &seg = rows[row].freeSites[i];
+            const Interval& seg = rows[row].freeSites[i];
             int start = max(cursor, seg.l);
             if (start + widthSites <= seg.r) {
                 int site = start;
@@ -545,7 +571,8 @@ bool Legalizer::snapInitialLegalize(double alpha) {
                     site = max(start, min(target, latest));
                 }
                 int distance = abs(site - target);
-                if (!preserveTargetGaps) return site;
+                if (!preserveTargetGaps)
+                    return site;
                 if (distance < bestDistance ||
                     (distance == bestDistance && (bestSite < 0 || site < bestSite))) {
                     bestDistance = distance;
@@ -557,9 +584,9 @@ bool Legalizer::snapInitialLegalize(double alpha) {
         return bestSite;
     };
 
-    auto commitTetrisFit = [&](TetrisRowState &state, int row, int site, int widthSites) {
+    auto commitTetrisFit = [&](TetrisRowState& state, int row, int site, int widthSites) {
         while (state.interval < rows[row].freeSites.size()) {
-            const Interval &seg = rows[row].freeSites[state.interval];
+            const Interval& seg = rows[row].freeSites[state.interval];
             if (site >= seg.l && site + widthSites <= seg.r) {
                 state.cursor = site + widthSites;
                 while (state.interval < rows[row].freeSites.size() &&
@@ -586,7 +613,8 @@ bool Legalizer::snapInitialLegalize(double alpha) {
         set<int> activeRows;
         for (int r = 0; r < numRows; ++r) {
             rowMaxRun[r] = maxRemainingRun(rowStates[r], r);
-            if (rowMaxRun[r] > 0) activeRows.insert(r);
+            if (rowMaxRun[r] > 0)
+                activeRows.insert(r);
         }
 
         for (int idx : order) {
@@ -621,7 +649,8 @@ bool Legalizer::snapInitialLegalize(double alpha) {
                 int row = takeUpper ? *upper : *lower;
                 int rowDistance = abs(row - targetR);
                 double minRowDisp = static_cast<double>(rowDistance) * siteH / dbuPerMicron;
-                if (bestRow >= 0 && minRowDisp > bestDisp + 1e-9) break;
+                if (bestRow >= 0 && minRowDisp > bestDisp + 1e-9)
+                    break;
 
                 if (takeUpper) {
                     ++upper;
@@ -632,9 +661,12 @@ bool Legalizer::snapInitialLegalize(double alpha) {
                     --lower;
                 }
 
-                if (rowMaxRun[row] < widthSites) continue;
-                int site = firstTetrisFit(rowStates[row], row, targetS, widthSites, preserveTargetGaps);
-                if (site < 0) continue;
+                if (rowMaxRun[row] < widthSites)
+                    continue;
+                int site =
+                    firstTetrisFit(rowStates[row], row, targetS, widthSites, preserveTargetGaps);
+                if (site < 0)
+                    continue;
 
                 long long x = dieLLX + static_cast<long long>(site) * siteW;
                 long long y = dieLLY + static_cast<long long>(row) * siteH;
@@ -654,25 +686,28 @@ bool Legalizer::snapInitialLegalize(double alpha) {
                 }
             }
 
-            if (bestRow < 0) return false;
-            if (!commitTetrisFit(rowStates[bestRow], bestRow, bestSite, widthSites)) return false;
+            if (bestRow < 0)
+                return false;
+            if (!commitTetrisFit(rowStates[bestRow], bestRow, bestSite, widthSites))
+                return false;
             restorePlacedCell(idx, bestRow, bestSite);
 
             rowMaxRun[bestRow] = maxRemainingRun(rowStates[bestRow], bestRow);
-            if (rowMaxRun[bestRow] <= 0) activeRows.erase(bestRow);
+            if (rowMaxRun[bestRow] <= 0)
+                activeRows.erase(bestRow);
         }
         return true;
     };
 
-    if (runTetris(true)) return true;
+    if (runTetris(true))
+        return true;
     return runTetris(false);
-
 }
 
 bool Legalizer::abacusInitialLegalize(double alpha) {
     vector<int> order(cells.size());
     for (int i = 0; i < static_cast<int>(cells.size()); ++i) {
-        const Instance &cell = cells[i];
+        const Instance& cell = cells[i];
         int widthSites = max(1, static_cast<int>(ceilDiv(cell.w, siteW)));
         int heightRows = max(1, static_cast<int>(ceilDiv(cell.h, siteH)));
         cellWidthSites[i] = widthSites;
@@ -694,8 +729,10 @@ bool Legalizer::abacusInitialLegalize(double alpha) {
     stable_sort(order.begin(), order.end(), [&](int a, int b) {
         int ra = targetRows[a];
         int rb = targetRows[b];
-        if (ra != rb) return ra < rb;
-        if (cells[a].x != cells[b].x) return cells[a].x < cells[b].x;
+        if (ra != rb)
+            return ra < rb;
+        if (cells[a].x != cells[b].x)
+            return cells[a].x < cells[b].x;
         return cells[a].name < cells[b].name;
     });
 
@@ -727,8 +764,9 @@ bool Legalizer::abacusInitialLegalize(double alpha) {
     vector<AbacusSubrowState> subrows;
     vector<vector<int>> rowSubrows(numRows);
     for (int r = 0; r < numRows; ++r) {
-        for (const Interval &seg : rows[r].freeSites) {
-            if (seg.r <= seg.l) continue;
+        for (const Interval& seg : rows[r].freeSites) {
+            if (seg.r <= seg.l)
+                continue;
             int id = static_cast<int>(subrows.size());
             AbacusSubrowState state;
             state.row = r;
@@ -741,13 +779,15 @@ bool Legalizer::abacusInitialLegalize(double alpha) {
     auto rebuildSingleRowByBacktracking = [&]() -> bool {
         constexpr int kBacktrackCellLimit = 128;
         constexpr size_t kBacktrackNodeLimit = 2000000;
-        if (singleRowCells.empty()) return true;
-        if (singleRowCells.size() > kBacktrackCellLimit || subrows.empty()) return false;
+        if (singleRowCells.empty())
+            return true;
+        if (singleRowCells.size() > kBacktrackCellLimit || subrows.empty())
+            return false;
 
         vector<int> remaining(subrows.size(), 0);
         vector<vector<int>> assigned(subrows.size());
         for (int i = 0; i < static_cast<int>(subrows.size()); ++i) {
-            AbacusSubrowState &state = subrows[i];
+            AbacusSubrowState& state = subrows[i];
             state.cells.clear();
             state.usedSites = 0;
             state.cost = 0.0;
@@ -758,16 +798,19 @@ bool Legalizer::abacusInitialLegalize(double alpha) {
         for (int idx : singleRowCells) {
             int widthSites = cellWidthSites[idx];
             for (int subrowId = 0; subrowId < static_cast<int>(subrows.size()); ++subrowId) {
-                if (remaining[subrowId] >= widthSites) candidates[idx].push_back(subrowId);
+                if (remaining[subrowId] >= widthSites)
+                    candidates[idx].push_back(subrowId);
             }
-            if (candidates[idx].empty()) return false;
+            if (candidates[idx].empty())
+                return false;
 
             stable_sort(candidates[idx].begin(), candidates[idx].end(), [&](int a, int b) {
-                const AbacusSubrowState &sa = subrows[a];
-                const AbacusSubrowState &sb = subrows[b];
+                const AbacusSubrowState& sa = subrows[a];
+                const AbacusSubrowState& sb = subrows[b];
                 int rowDistA = abs(sa.row - targetRows[idx]);
                 int rowDistB = abs(sb.row - targetRows[idx]);
-                if (rowDistA != rowDistB) return rowDistA < rowDistB;
+                if (rowDistA != rowDistB)
+                    return rowDistA < rowDistB;
 
                 int siteA = max(sa.interval.l, min(targetSites[idx], sa.interval.r - widthSites));
                 int siteB = max(sb.interval.l, min(targetSites[idx], sb.interval.r - widthSites));
@@ -777,23 +820,29 @@ bool Legalizer::abacusInitialLegalize(double alpha) {
                 long long yb = dieLLY + static_cast<long long>(sb.row) * siteH;
                 double dispA = displacementCost(idx, xa, ya);
                 double dispB = displacementCost(idx, xb, yb);
-                if (fabs(dispA - dispB) > 1e-9) return dispA < dispB;
+                if (fabs(dispA - dispB) > 1e-9)
+                    return dispA < dispB;
 
                 int slackA = remaining[a] - widthSites;
                 int slackB = remaining[b] - widthSites;
-                if (slackA != slackB) return slackA < slackB;
+                if (slackA != slackB)
+                    return slackA < slackB;
                 return a < b;
             });
         }
 
         vector<int> order = singleRowCells;
         stable_sort(order.begin(), order.end(), [&](int a, int b) {
-            if (cellWidthSites[a] != cellWidthSites[b]) return cellWidthSites[a] > cellWidthSites[b];
-            if (candidates[a].size() != candidates[b].size()) return candidates[a].size() < candidates[b].size();
+            if (cellWidthSites[a] != cellWidthSites[b])
+                return cellWidthSites[a] > cellWidthSites[b];
+            if (candidates[a].size() != candidates[b].size())
+                return candidates[a].size() < candidates[b].size();
             int rowDistA = abs(subrows[candidates[a].front()].row - targetRows[a]);
             int rowDistB = abs(subrows[candidates[b].front()].row - targetRows[b]);
-            if (rowDistA != rowDistB) return rowDistA > rowDistB;
-            if (cells[a].x != cells[b].x) return cells[a].x < cells[b].x;
+            if (rowDistA != rowDistB)
+                return rowDistA > rowDistB;
+            if (cells[a].x != cells[b].x)
+                return cells[a].x < cells[b].x;
             return cells[a].name < cells[b].name;
         });
 
@@ -804,17 +853,22 @@ bool Legalizer::abacusInitialLegalize(double alpha) {
 
         size_t nodes = 0;
         function<bool(int)> search = [&](int pos) -> bool {
-            if (pos == static_cast<int>(order.size())) return true;
-            if (++nodes > kBacktrackNodeLimit) return false;
+            if (pos == static_cast<int>(order.size()))
+                return true;
+            if (++nodes > kBacktrackNodeLimit)
+                return false;
 
             int totalRemaining = 0;
-            for (int cap : remaining) totalRemaining += cap;
-            if (totalRemaining < suffixWidth[pos]) return false;
+            for (int cap : remaining)
+                totalRemaining += cap;
+            if (totalRemaining < suffixWidth[pos])
+                return false;
 
             int idx = order[pos];
             int widthSites = cellWidthSites[idx];
             for (int subrowId : candidates[idx]) {
-                if (remaining[subrowId] < widthSites) continue;
+                if (remaining[subrowId] < widthSites)
+                    continue;
 
                 remaining[subrowId] -= widthSites;
                 assigned[subrowId].push_back(idx);
@@ -835,7 +889,8 @@ bool Legalizer::abacusInitialLegalize(double alpha) {
                     }
                 }
 
-                if (futureFeasible && search(pos + 1)) return true;
+                if (futureFeasible && search(pos + 1))
+                    return true;
 
                 assigned[subrowId].pop_back();
                 remaining[subrowId] += widthSites;
@@ -843,10 +898,11 @@ bool Legalizer::abacusInitialLegalize(double alpha) {
             return false;
         };
 
-        if (!search(0)) return false;
+        if (!search(0))
+            return false;
 
         for (int subrowId = 0; subrowId < static_cast<int>(subrows.size()); ++subrowId) {
-            AbacusSubrowState &state = subrows[subrowId];
+            AbacusSubrowState& state = subrows[subrowId];
             state.cells = std::move(assigned[subrowId]);
             state.usedSites = state.interval.r - state.interval.l - remaining[subrowId];
             vector<pair<int, int>> packed = packAbacusSubrow(state.cells, state.interval);
@@ -858,7 +914,8 @@ bool Legalizer::abacusInitialLegalize(double alpha) {
     bool exactInsertion = singleRowCells.size() <= 5000;
     bool rebuiltSingleRows = false;
     for (int idx : singleRowCells) {
-        if (rebuiltSingleRows) break;
+        if (rebuiltSingleRows)
+            break;
         int targetR = targetRows[idx];
         int targetS = targetSites[idx];
         int widthSites = cellWidthSites[idx];
@@ -875,14 +932,18 @@ bool Legalizer::abacusInitialLegalize(double alpha) {
             while (true) {
                 for (int d = 0; d <= currentWindow; ++d) {
                     for (int sign : {0, -1, 1}) {
-                        if (sign == 0 && d != 0) continue;
-                        if (sign != 0 && d == 0) continue;
+                        if (sign == 0 && d != 0)
+                            continue;
+                        if (sign != 0 && d == 0)
+                            continue;
                         int row = targetR + sign * d;
-                        if (row < 0 || row >= numRows) continue;
+                        if (row < 0 || row >= numRows)
+                            continue;
 
                         for (int subrowId : rowSubrows[row]) {
-                            const AbacusSubrowState &state = subrows[subrowId];
-                            if (state.usedSites + widthSites > state.interval.r - state.interval.l) continue;
+                            const AbacusSubrowState& state = subrows[subrowId];
+                            if (state.usedSites + widthSites > state.interval.r - state.interval.l)
+                                continue;
 
                             vector<int> trial = state.cells;
                             trial.push_back(idx);
@@ -890,8 +951,9 @@ bool Legalizer::abacusInitialLegalize(double alpha) {
                             double cost = packedSubrowCost(packed, row, alpha);
                             double delta = cost - state.cost;
                             double newDisp = numeric_limits<double>::infinity();
-                            for (const auto &[cellIdx, site] : packed) {
-                                if (cellIdx != idx) continue;
+                            for (const auto& [cellIdx, site] : packed) {
+                                if (cellIdx != idx)
+                                    continue;
                                 long long x = dieLLX + static_cast<long long>(site) * siteW;
                                 long long y = dieLLY + static_cast<long long>(row) * siteH;
                                 newDisp = displacementCost(idx, x, y);
@@ -900,8 +962,8 @@ bool Legalizer::abacusInitialLegalize(double alpha) {
 
                             if (delta < bestDelta - 1e-9 ||
                                 (fabs(delta - bestDelta) < 1e-9 && newDisp < bestDisp - 1e-9) ||
-                                (fabs(delta - bestDelta) < 1e-9 && fabs(newDisp - bestDisp) < 1e-9 &&
-                                 subrowId < bestSubrow)) {
+                                (fabs(delta - bestDelta) < 1e-9 &&
+                                 fabs(newDisp - bestDisp) < 1e-9 && subrowId < bestSubrow)) {
                                 found = true;
                                 bestSubrow = subrowId;
                                 bestDelta = delta;
@@ -912,8 +974,10 @@ bool Legalizer::abacusInitialLegalize(double alpha) {
                     }
                 }
 
-                double minFutureDisp = static_cast<double>(currentWindow + 1) * siteH / dbuPerMicron;
-                if ((found && minFutureDisp >= bestDisp - 1e-9) || currentWindow >= maxWindow) break;
+                double minFutureDisp =
+                    static_cast<double>(currentWindow + 1) * siteH / dbuPerMicron;
+                if ((found && minFutureDisp >= bestDisp - 1e-9) || currentWindow >= maxWindow)
+                    break;
                 currentWindow = min(maxWindow, max(currentWindow + 1, currentWindow * 2));
             }
         } else {
@@ -925,17 +989,22 @@ bool Legalizer::abacusInitialLegalize(double alpha) {
             while (true) {
                 for (int d = 0; d <= currentWindow; ++d) {
                     for (int sign : {0, -1, 1}) {
-                        if (sign == 0 && d != 0) continue;
-                        if (sign != 0 && d == 0) continue;
+                        if (sign == 0 && d != 0)
+                            continue;
+                        if (sign != 0 && d == 0)
+                            continue;
                         int row = targetR + sign * d;
-                        if (row < 0 || row >= numRows) continue;
+                        if (row < 0 || row >= numRows)
+                            continue;
 
                         for (int subrowId : rowSubrows[row]) {
-                            const AbacusSubrowState &state = subrows[subrowId];
+                            const AbacusSubrowState& state = subrows[subrowId];
                             int capacity = state.interval.r - state.interval.l;
-                            if (state.usedSites + widthSites > capacity) continue;
+                            if (state.usedSites + widthSites > capacity)
+                                continue;
 
-                            int site = max(state.interval.l, min(targetS, state.interval.r - widthSites));
+                            int site =
+                                max(state.interval.l, min(targetS, state.interval.r - widthSites));
                             long long x = dieLLX + static_cast<long long>(site) * siteW;
                             long long y = dieLLY + static_cast<long long>(row) * siteH;
                             double score = displacementCost(idx, x, y);
@@ -958,8 +1027,10 @@ bool Legalizer::abacusInitialLegalize(double alpha) {
                     }
                 }
 
-                double minFutureDisp = static_cast<double>(currentWindow + 1) * siteH / dbuPerMicron;
-                if ((found && minFutureDisp >= bestDisp - 1e-9) || currentWindow >= maxWindow) break;
+                double minFutureDisp =
+                    static_cast<double>(currentWindow + 1) * siteH / dbuPerMicron;
+                if ((found && minFutureDisp >= bestDisp - 1e-9) || currentWindow >= maxWindow)
+                    break;
                 currentWindow = min(maxWindow, max(currentWindow + 1, currentWindow * 2));
             }
         }
@@ -973,15 +1044,16 @@ bool Legalizer::abacusInitialLegalize(double alpha) {
             return false;
         }
 
-        AbacusSubrowState &state = subrows[bestSubrow];
+        AbacusSubrowState& state = subrows[bestSubrow];
         state.cells.push_back(idx);
         state.usedSites += widthSites;
-        if (exactInsertion) state.cost = bestCost;
+        if (exactInsertion)
+            state.cost = bestCost;
     }
 
-    for (const AbacusSubrowState &state : subrows) {
+    for (const AbacusSubrowState& state : subrows) {
         vector<pair<int, int>> packed = packAbacusSubrow(state.cells, state.interval);
-        for (const auto &[idx, site] : packed) {
+        for (const auto& [idx, site] : packed) {
             long long x = dieLLX + static_cast<long long>(site) * siteW;
             long long y = dieLLY + static_cast<long long>(state.row) * siteH;
             placementX[idx] = x;
@@ -996,18 +1068,20 @@ bool Legalizer::abacusInitialLegalize(double alpha) {
     return true;
 }
 
-vector<pair<int, int>> Legalizer::packAbacusSubrow(const vector<int> &cellIdxs,
-                                                   const Interval &interval) const {
+vector<pair<int, int>> Legalizer::packAbacusSubrow(const vector<int>& cellIdxs,
+                                                   const Interval& interval) const {
     vector<int> ordered = cellIdxs;
     stable_sort(ordered.begin(), ordered.end(), [&](int a, int b) {
         int ta = targetSites[a];
         int tb = targetSites[b];
-        if (ta != tb) return ta < tb;
-        if (cells[a].x != cells[b].x) return cells[a].x < cells[b].x;
+        if (ta != tb)
+            return ta < tb;
+        if (cells[a].x != cells[b].x)
+            return cells[a].x < cells[b].x;
         return cells[a].name < cells[b].name;
     });
 
-    auto placeCluster = [&](AbacusCluster &cluster) {
+    auto placeCluster = [&](AbacusCluster& cluster) {
         int maxStart = interval.r - cluster.width;
         vector<int> ideals;
         ideals.reserve(cluster.cells.size());
@@ -1048,8 +1122,8 @@ vector<pair<int, int>> Legalizer::packAbacusSubrow(const vector<int> &cellIdxs,
             AbacusCluster merged;
             merged.width = previous.width + current.width;
             merged.weight = previous.weight + current.weight;
-            merged.q = previous.q + current.q -
-                       static_cast<long long>(current.weight) * previous.width;
+            merged.q =
+                previous.q + current.q - static_cast<long long>(current.weight) * previous.width;
             merged.cells = std::move(previous.cells);
             merged.cells.insert(merged.cells.end(), current.cells.begin(), current.cells.end());
             placeCluster(merged);
@@ -1059,7 +1133,7 @@ vector<pair<int, int>> Legalizer::packAbacusSubrow(const vector<int> &cellIdxs,
 
     vector<pair<int, int>> packed;
     packed.reserve(ordered.size());
-    for (const AbacusCluster &cluster : clusters) {
+    for (const AbacusCluster& cluster : clusters) {
         int site = cluster.x;
         for (int idx : cluster.cells) {
             packed.push_back({idx, site});
@@ -1069,12 +1143,12 @@ vector<pair<int, int>> Legalizer::packAbacusSubrow(const vector<int> &cellIdxs,
     return packed;
 }
 
-double Legalizer::packedSubrowCost(const vector<pair<int, int>> &packed,
-                                   int row, double alpha) const {
+double Legalizer::packedSubrowCost(const vector<pair<int, int>>& packed, int row,
+                                   double alpha) const {
     (void)alpha;
     double total = 0.0;
     long long y = dieLLY + static_cast<long long>(row) * siteH;
-    for (const auto &[idx, site] : packed) {
+    for (const auto& [idx, site] : packed) {
         long long x = dieLLX + static_cast<long long>(site) * siteW;
         total += displacementCost(idx, x, y);
     }
@@ -1083,13 +1157,16 @@ double Legalizer::packedSubrowCost(const vector<pair<int, int>> &packed,
 
 vector<int> Legalizer::candidateSitesInRow(int row, int target, int widthSites) const {
     vector<int> result;
-    const auto &iv = rows[row].freeSites;
-    if (iv.empty()) return result;
+    const auto& iv = rows[row].freeSites;
+    if (iv.empty())
+        return result;
 
     auto addSite = [&](int s) {
-        if (s < 0 || s + widthSites > numSites) return;
+        if (s < 0 || s + widthSites > numSites)
+            return;
         for (int old : result) {
-            if (old == s) return;
+            if (old == s)
+                return;
         }
         result.push_back(s);
     };
@@ -1097,33 +1174,41 @@ vector<int> Legalizer::candidateSitesInRow(int row, int target, int widthSites) 
     auto addNearestForTarget = [&](int localTarget, int limit) {
         localTarget = max(0, min(numSites - widthSites, localTarget));
         auto it = lower_bound(iv.begin(), iv.end(), localTarget,
-                              [](const Interval &a, int value) { return a.l < value; });
+                              [](const Interval& a, int value) { return a.l < value; });
         int pos = static_cast<int>(it - iv.begin());
 
         int bestDx = numeric_limits<int>::max();
         for (int i = pos; i < static_cast<int>(iv.size()); ++i) {
-            if (iv[i].r - iv[i].l < widthSites) continue;
-            if (iv[i].l > localTarget + bestDx) break;
+            if (iv[i].r - iv[i].l < widthSites)
+                continue;
+            if (iv[i].l > localTarget + bestDx)
+                break;
             int s = max(iv[i].l, min(localTarget, iv[i].r - widthSites));
             int dx = abs(s - localTarget);
-            if (dx < bestDx) bestDx = dx;
+            if (dx < bestDx)
+                bestDx = dx;
             addSite(s);
             addSite(iv[i].l);
             addSite(iv[i].r - widthSites);
-            if (static_cast<int>(result.size()) >= limit) break;
+            if (static_cast<int>(result.size()) >= limit)
+                break;
         }
 
         for (int i = pos - 1; i >= 0; --i) {
-            if (iv[i].r - iv[i].l < widthSites) continue;
+            if (iv[i].r - iv[i].l < widthSites)
+                continue;
             int maxStart = iv[i].r - widthSites;
-            if (localTarget - maxStart > bestDx && !result.empty()) break;
+            if (localTarget - maxStart > bestDx && !result.empty())
+                break;
             int s = max(iv[i].l, min(localTarget, maxStart));
             int dx = abs(s - localTarget);
-            if (dx < bestDx) bestDx = dx;
+            if (dx < bestDx)
+                bestDx = dx;
             addSite(s);
             addSite(iv[i].l);
             addSite(maxStart);
-            if (static_cast<int>(result.size()) >= limit) break;
+            if (static_cast<int>(result.size()) >= limit)
+                break;
         }
     };
 
@@ -1137,7 +1222,7 @@ vector<int> Legalizer::candidateSitesInRow(int row, int target, int widthSites) 
     }
 
     if (result.empty()) {
-        for (const auto &seg : iv) {
+        for (const auto& seg : iv) {
             if (seg.r - seg.l >= widthSites) {
                 addSite(max(seg.l, min(target, seg.r - widthSites)));
                 break;
@@ -1151,13 +1236,14 @@ vector<int> Legalizer::candidateSitesInRow(int row, int target, int widthSites) 
 bool Legalizer::canPlaceMultiRow(int row, int site, int widthSites, int heightRows) const {
     for (int rr = row; rr < row + heightRows; ++rr) {
         bool covered = false;
-        for (const auto &seg : rows[rr].freeSites) {
+        for (const auto& seg : rows[rr].freeSites) {
             if (seg.l <= site && site + widthSites <= seg.r) {
                 covered = true;
                 break;
             }
         }
-        if (!covered) return false;
+        if (!covered)
+            return false;
     }
     return true;
 }
@@ -1178,19 +1264,24 @@ Candidate Legalizer::findBestCandidate(int cellIdx) const {
     while (!found) {
         for (int d = 0; d <= currentWindow; ++d) {
             for (int sign : {0, -1, 1}) {
-                if (sign == 0 && d != 0) continue;
-                if (sign != 0 && d == 0) continue;
+                if (sign == 0 && d != 0)
+                    continue;
+                if (sign != 0 && d == 0)
+                    continue;
                 int row = tRow + sign * d;
-                if (row < 0 || row > maxStartRow) continue;
+                if (row < 0 || row > maxStartRow)
+                    continue;
 
                 vector<int> sites = candidateSitesInRow(row, tSite, widthSites);
                 for (int site : sites) {
-                    if (!canPlaceMultiRow(row, site, widthSites, heightRows)) continue;
+                    if (!canPlaceMultiRow(row, site, widthSites, heightRows))
+                        continue;
                     long long x = dieLLX + static_cast<long long>(site) * siteW;
                     long long y = dieLLY + static_cast<long long>(row) * siteH;
                     double disp = displacementCost(cellIdx, x, y);
                     double cost = disp;
-                    if (cost < best.cost || (fabs(cost - best.cost) < 1e-9 && disp < best.displacement)) {
+                    if (cost < best.cost ||
+                        (fabs(cost - best.cost) < 1e-9 && disp < best.displacement)) {
                         best = {row, site, cost, disp};
                         found = true;
                     }
@@ -1199,7 +1290,8 @@ Candidate Legalizer::findBestCandidate(int cellIdx) const {
         }
 
         double minFutureDisp = static_cast<double>(currentWindow + 1) * siteH / dbuPerMicron;
-        if ((found && minFutureDisp >= best.displacement - 1e-9) || currentWindow >= maxStartRow) break;
+        if ((found && minFutureDisp >= best.displacement - 1e-9) || currentWindow >= maxStartRow)
+            break;
         currentWindow = min(maxStartRow, max(currentWindow + 1, currentWindow * 2));
     }
 
@@ -1216,7 +1308,8 @@ bool Legalizer::ownerCanPlace(int cellIdx, int row, int site) const {
 
     for (int rr = row; rr < row + heightRows; ++rr) {
         for (int ss = site; ss < site + widthSites; ++ss) {
-            if (siteOwner[static_cast<size_t>(rr) * numSites + ss] != -1) return false;
+            if (siteOwner[static_cast<size_t>(rr) * numSites + ss] != -1)
+                return false;
         }
     }
     return true;
@@ -1234,8 +1327,8 @@ void Legalizer::setOwner(int cellIdx, int row, int site, int value) {
 
 void Legalizer::removePlacedCell(int cellIdx) {
     setOwner(cellIdx, placementRow[cellIdx], placementSite[cellIdx], -1);
-    addCellToDensityDelta(placementX[cellIdx], placementY[cellIdx],
-                          cells[cellIdx].w, cells[cellIdx].h, -1.0);
+    addCellToDensityDelta(placementX[cellIdx], placementY[cellIdx], cells[cellIdx].w,
+                          cells[cellIdx].h, -1.0);
 }
 
 void Legalizer::restorePlacedCell(int cellIdx, int row, int site) {
@@ -1263,7 +1356,8 @@ double Legalizer::placementCost(int cellIdx, long long x, long long y, double al
 }
 
 double Legalizer::averageDisplacement() const {
-    if (cells.empty()) return 0.0;
+    if (cells.empty())
+        return 0.0;
     double total = 0.0;
     for (int i = 0; i < static_cast<int>(cells.size()); ++i) {
         total += displacementCost(i, placementX[i], placementY[i]);
@@ -1272,18 +1366,21 @@ double Legalizer::averageDisplacement() const {
 }
 
 double Legalizer::densityOverflowRatio() const {
-    if (gridCols <= 0 || gridRows <= 0) return 0.0;
+    if (gridCols <= 0 || gridRows <= 0)
+        return 0.0;
 
     double threshold = densityThreshold;
     vector<unsigned char> touched(static_cast<size_t>(gridCols) * gridRows, 0);
     for (int i = 0; i < static_cast<int>(cells.size()); ++i) {
-        if (!cells[i].name.empty() && cells[i].name[0] == 'h') continue;
+        if (!cells[i].name.empty() && cells[i].name[0] == 'h')
+            continue;
 
         long long x1 = placementX[i];
         long long y1 = placementY[i];
         long long x2 = x1 + cells[i].w;
         long long y2 = y1 + cells[i].h;
-        if (x2 < gridLLX || x1 > gridURX || y2 < gridLLY || y1 > gridURY) continue;
+        if (x2 < gridLLX || x1 > gridURX || y2 < gridLLY || y1 > gridURY)
+            continue;
 
         int c0 = max(gridLineLowerBound(x1, gridLLX, gridURX, gridSize, gridCols) - 1, 0);
         int c1 = min(gridLineUpperBound(x2, gridLLX, gridURX, gridSize, gridCols), gridCols);
@@ -1303,16 +1400,20 @@ double Legalizer::densityOverflowRatio() const {
         long long gy2 = min(gy1 + gridSize, gridURY);
         for (int c = 0; c < gridCols; ++c) {
             size_t idx = static_cast<size_t>(r) * gridCols + c;
-            if (gridExcluded[idx]) continue;
-            if (!touched[idx]) continue;
+            if (gridExcluded[idx])
+                continue;
+            if (!touched[idx])
+                continue;
 
             long long gx1 = gridLLX + static_cast<long long>(c) * gridSize;
             long long gx2 = min(gx1 + gridSize, gridURX);
             double gridArea = static_cast<double>(gx2 - gx1) * static_cast<double>(gy2 - gy1);
-            if (gridArea <= 0.0) continue;
+            if (gridArea <= 0.0)
+                continue;
 
             ++total;
-            if (gridAreaUsed[idx] / gridArea > threshold) ++overflow;
+            if (gridAreaUsed[idx] / gridArea > threshold)
+                ++overflow;
         }
     }
 
@@ -1325,7 +1426,8 @@ double Legalizer::qualityScore(double alpha) const {
 }
 
 bool Legalizer::runtimeLimitReached() {
-    if (chrono::steady_clock::now() < runtimeDeadline) return false;
+    if (chrono::steady_clock::now() < runtimeDeadline)
+        return false;
     runtimeLimitHit = true;
     return true;
 }
@@ -1342,13 +1444,15 @@ void Legalizer::saveBestPlacement(double quality) {
 
 bool Legalizer::updateBestPlacement(double alpha) {
     double currentQuality = qualityScore(alpha);
-    if (currentQuality >= bestQuality - 1e-9) return false;
+    if (currentQuality >= bestQuality - 1e-9)
+        return false;
     saveBestPlacement(currentQuality);
     return true;
 }
 
 void Legalizer::restoreBestPlacement() {
-    if (bestPlacementX.empty()) return;
+    if (bestPlacementX.empty())
+        return;
     placementX = bestPlacementX;
     placementY = bestPlacementY;
     placementRow = bestPlacementRow;
@@ -1374,7 +1478,8 @@ bool Legalizer::tryMoveCell(int cellIdx, int rowRadius, int siteRadius, double a
 
     double bestCost = placementCost(cellIdx, oldX, oldY, alpha);
     double bestDisp = displacementCost(cellIdx, oldX, oldY);
-    double oldDensityPenalty = estimateDensityPenalty(oldX, oldY, cells[cellIdx].w, cells[cellIdx].h);
+    double oldDensityPenalty =
+        estimateDensityPenalty(oldX, oldY, cells[cellIdx].w, cells[cellIdx].h);
     int bestRow = oldRow;
     int bestSite = oldSite;
 
@@ -1385,8 +1490,10 @@ bool Legalizer::tryMoveCell(int cellIdx, int rowRadius, int siteRadius, double a
     for (int center : rowCenters) {
         for (int d = -rowRadius; d <= rowRadius; ++d) {
             int r = center + d;
-            if (r < 0 || r > maxStartRow) continue;
-            if (find(rowsToTry.begin(), rowsToTry.end(), r) == rowsToTry.end()) rowsToTry.push_back(r);
+            if (r < 0 || r > maxStartRow)
+                continue;
+            if (find(rowsToTry.begin(), rowsToTry.end(), r) == rowsToTry.end())
+                rowsToTry.push_back(r);
         }
     }
 
@@ -1401,11 +1508,14 @@ bool Legalizer::tryMoveCell(int cellIdx, int rowRadius, int siteRadius, double a
         }
 
         for (int s : sitesToTry) {
-            if (!ownerCanPlace(cellIdx, r, s)) continue;
+            if (!ownerCanPlace(cellIdx, r, s))
+                continue;
             long long x = dieLLX + static_cast<long long>(s) * siteW;
             long long y = dieLLY + static_cast<long long>(r) * siteH;
-            double densityPenalty = estimateDensityPenalty(x, y, cells[cellIdx].w, cells[cellIdx].h);
-            if (densityPenalty > oldDensityPenalty + 1e-9) continue;
+            double densityPenalty =
+                estimateDensityPenalty(x, y, cells[cellIdx].w, cells[cellIdx].h);
+            if (densityPenalty > oldDensityPenalty + 1e-9)
+                continue;
             double disp = displacementCost(cellIdx, x, y);
             double a = max(0.0, min(1.0, alpha));
             double cost = a * kDisplacementNormFactor * disp + (1.0 - a) * densityPenalty;
@@ -1441,7 +1551,8 @@ void Legalizer::detailPlace(double alpha) {
     }
 
     vector<int> order(cells.size());
-    for (int i = 0; i < static_cast<int>(cells.size()); ++i) order[i] = i;
+    for (int i = 0; i < static_cast<int>(cells.size()); ++i)
+        order[i] = i;
 
     for (int pass = 0; pass < passes; ++pass) {
         if (runtimeLimitReached()) {
@@ -1452,20 +1563,23 @@ void Legalizer::detailPlace(double alpha) {
         stable_sort(order.begin(), order.end(), [&](int a, int b) {
             double da = displacementCost(a, placementX[a], placementY[a]);
             double db = displacementCost(b, placementX[b], placementY[b]);
-            if (fabs(da - db) > 1e-9) return da > db;
+            if (fabs(da - db) > 1e-9)
+                return da > db;
             return cells[a].name < cells[b].name;
         });
 
         int moved = 0;
         for (int i = 0; i < maxCellsToVisit; ++i) {
-            if (tryMoveCell(order[i], rowRadius, siteRadius, alpha)) ++moved;
+            if (tryMoveCell(order[i], rowRadius, siteRadius, alpha))
+                ++moved;
             if ((i & 1023) == 1023 && runtimeLimitReached()) {
                 updateBestPlacement(alpha);
                 return;
             }
         }
         updateBestPlacement(alpha);
-        if (moved == 0) break;
+        if (moved == 0)
+            break;
     }
 }
 
@@ -1506,7 +1620,8 @@ void Legalizer::refineCells(double alpha) {
                                  displacementCost(b, placementX[b], placementY[b]);
                 double newDisp = displacementCost(a, placementX[b], placementY[b]) +
                                  displacementCost(b, placementX[a], placementY[a]);
-                if (newDisp >= oldDisp - 1e-9) continue;
+                if (newDisp >= oldDisp - 1e-9)
+                    continue;
 
                 int aRow = placementRow[a], aSite = placementSite[a];
                 int bRow = placementRow[b], bSite = placementSite[b];
@@ -1532,12 +1647,14 @@ void Legalizer::refineCells(double alpha) {
         }
 
         updateBestPlacement(alpha);
-        if (!changed) break;
+        if (!changed)
+            break;
     }
 }
 
 void Legalizer::refinePairSwaps(double alpha) {
-    if (cells.size() > 5000) return;
+    if (cells.size() > 5000)
+        return;
 
     for (int pass = 0; pass < 4; ++pass) {
         bool changed = false;
@@ -1556,7 +1673,8 @@ void Legalizer::refinePairSwaps(double alpha) {
 
                 double oldCost = displacementCost(a, aX, aY) + displacementCost(b, bX, bY);
                 double newCost = displacementCost(a, bX, bY) + displacementCost(b, aX, aY);
-                if (newCost >= oldCost - 1e-9) continue;
+                if (newCost >= oldCost - 1e-9)
+                    continue;
 
                 removePlacedCell(a);
                 removePlacedCell(b);
@@ -1574,63 +1692,75 @@ void Legalizer::refinePairSwaps(double alpha) {
         }
 
         updateBestPlacement(alpha);
-        if (!changed) break;
+        if (!changed)
+            break;
     }
 }
 
 void Legalizer::refineSmallReinsert(double alpha) {
-    if (cells.size() > 128) return;
+    if (cells.size() > 128)
+        return;
 
     vector<Interval> rowIntervals(numRows);
     for (int r = 0; r < numRows; ++r) {
-        if (rows[r].freeSites.size() != 1) return;
+        if (rows[r].freeSites.size() != 1)
+            return;
         rowIntervals[r] = rows[r].freeSites.front();
     }
     for (int i = 0; i < static_cast<int>(cells.size()); ++i) {
-        if (cellHeightRows[i] != 1) return;
+        if (cellHeightRows[i] != 1)
+            return;
     }
 
     vector<vector<int>> rowCells(numRows);
     for (int i = 0; i < static_cast<int>(cells.size()); ++i) {
-        if (placementRow[i] < 0 || placementRow[i] >= numRows) return;
+        if (placementRow[i] < 0 || placementRow[i] >= numRows)
+            return;
         rowCells[placementRow[i]].push_back(i);
     }
-    auto sortByPlacement = [&](vector<int> &items) {
+    auto sortByPlacement = [&](vector<int>& items) {
         stable_sort(items.begin(), items.end(), [&](int a, int b) {
-            if (placementSite[a] != placementSite[b]) return placementSite[a] < placementSite[b];
+            if (placementSite[a] != placementSite[b])
+                return placementSite[a] < placementSite[b];
             return cells[a].name < cells[b].name;
         });
     };
-    for (auto &items : rowCells) sortByPlacement(items);
+    for (auto& items : rowCells)
+        sortByPlacement(items);
 
-    auto rowPackedCost = [&](int row, const vector<int> &items, vector<pair<int, int>> *packedOut) {
+    auto rowPackedCost = [&](int row, const vector<int>& items, vector<pair<int, int>>* packedOut) {
         int usedSites = 0;
-        for (int idx : items) usedSites += cellWidthSites[idx];
-        const Interval &interval = rowIntervals[row];
-        if (usedSites > interval.r - interval.l) return numeric_limits<double>::infinity();
+        for (int idx : items)
+            usedSites += cellWidthSites[idx];
+        const Interval& interval = rowIntervals[row];
+        if (usedSites > interval.r - interval.l)
+            return numeric_limits<double>::infinity();
 
         vector<pair<int, int>> packed = packAbacusSubrow(items, interval);
         double cost = 0.0;
         long long y = dieLLY + static_cast<long long>(row) * siteH;
-        for (const auto &[idx, site] : packed) {
+        for (const auto& [idx, site] : packed) {
             long long x = dieLLX + static_cast<long long>(site) * siteW;
             cost += displacementCost(idx, x, y);
         }
-        if (packedOut) *packedOut = std::move(packed);
+        if (packedOut)
+            *packedOut = std::move(packed);
         return cost;
     };
 
-    auto rowCurrentCost = [&](const vector<int> &items) {
+    auto rowCurrentCost = [&](const vector<int>& items) {
         double cost = 0.0;
-        for (int idx : items) cost += displacementCost(idx, placementX[idx], placementY[idx]);
+        for (int idx : items)
+            cost += displacementCost(idx, placementX[idx], placementY[idx]);
         return cost;
     };
 
-    auto withoutCell = [](const vector<int> &items, int idx) {
+    auto withoutCell = [](const vector<int>& items, int idx) {
         vector<int> result;
         result.reserve(items.size());
         for (int item : items) {
-            if (item != idx) result.push_back(item);
+            if (item != idx)
+                result.push_back(item);
         }
         return result;
     };
@@ -1645,7 +1775,8 @@ void Legalizer::refineSmallReinsert(double alpha) {
         for (int idx = 0; idx < static_cast<int>(cells.size()); ++idx) {
             int oldRow = placementRow[idx];
             for (int row = 0; row < numRows; ++row) {
-                if (row == oldRow) continue;
+                if (row == oldRow)
+                    continue;
 
                 vector<int> oldTrial = withoutCell(rowCells[oldRow], idx);
                 vector<int> newTrial = rowCells[row];
@@ -1665,7 +1796,8 @@ void Legalizer::refineSmallReinsert(double alpha) {
             }
         }
 
-        if (bestCell < 0) break;
+        if (bestCell < 0)
+            break;
 
         int oldRow = placementRow[bestCell];
         vector<pair<int, int>> oldPacked;
@@ -1674,12 +1806,16 @@ void Legalizer::refineSmallReinsert(double alpha) {
         rowPackedCost(bestTargetRow, bestNewRowCells, &newPacked);
 
         vector<int> affected = rowCells[oldRow];
-        affected.insert(affected.end(), rowCells[bestTargetRow].begin(), rowCells[bestTargetRow].end());
+        affected.insert(affected.end(), rowCells[bestTargetRow].begin(),
+                        rowCells[bestTargetRow].end());
         sort(affected.begin(), affected.end());
         affected.erase(unique(affected.begin(), affected.end()), affected.end());
-        for (int idx : affected) removePlacedCell(idx);
-        for (const auto &[idx, site] : oldPacked) restorePlacedCell(idx, oldRow, site);
-        for (const auto &[idx, site] : newPacked) restorePlacedCell(idx, bestTargetRow, site);
+        for (int idx : affected)
+            removePlacedCell(idx);
+        for (const auto& [idx, site] : oldPacked)
+            restorePlacedCell(idx, oldRow, site);
+        for (const auto& [idx, site] : newPacked)
+            restorePlacedCell(idx, bestTargetRow, site);
 
         rowCells[oldRow] = std::move(bestOldRowCells);
         rowCells[bestTargetRow] = std::move(bestNewRowCells);
@@ -1699,7 +1835,8 @@ void Legalizer::refineSmallReinsert(double alpha) {
             int aRow = placementRow[a];
             for (int b = a + 1; b < static_cast<int>(cells.size()); ++b) {
                 int bRow = placementRow[b];
-                if (aRow == bRow) continue;
+                if (aRow == bRow)
+                    continue;
 
                 vector<int> aTrial = withoutCell(rowCells[aRow], a);
                 vector<int> bTrial = withoutCell(rowCells[bRow], b);
@@ -1707,8 +1844,8 @@ void Legalizer::refineSmallReinsert(double alpha) {
                 bTrial.push_back(a);
 
                 double oldCost = rowCurrentCost(rowCells[aRow]) + rowCurrentCost(rowCells[bRow]);
-                double newCost = rowPackedCost(aRow, aTrial, nullptr) +
-                                 rowPackedCost(bRow, bTrial, nullptr);
+                double newCost =
+                    rowPackedCost(aRow, aTrial, nullptr) + rowPackedCost(bRow, bTrial, nullptr);
                 double gain = oldCost - newCost;
                 if (gain > bestGain) {
                     bestGain = gain;
@@ -1720,7 +1857,8 @@ void Legalizer::refineSmallReinsert(double alpha) {
             }
         }
 
-        if (bestA < 0) break;
+        if (bestA < 0)
+            break;
 
         int aRow = placementRow[bestA];
         int bRow = placementRow[bestB];
@@ -1733,9 +1871,12 @@ void Legalizer::refineSmallReinsert(double alpha) {
         affected.insert(affected.end(), rowCells[bRow].begin(), rowCells[bRow].end());
         sort(affected.begin(), affected.end());
         affected.erase(unique(affected.begin(), affected.end()), affected.end());
-        for (int idx : affected) removePlacedCell(idx);
-        for (const auto &[idx, site] : aPacked) restorePlacedCell(idx, aRow, site);
-        for (const auto &[idx, site] : bPacked) restorePlacedCell(idx, bRow, site);
+        for (int idx : affected)
+            removePlacedCell(idx);
+        for (const auto& [idx, site] : aPacked)
+            restorePlacedCell(idx, aRow, site);
+        for (const auto& [idx, site] : bPacked)
+            restorePlacedCell(idx, bRow, site);
 
         rowCells[aRow] = std::move(bestARowCells);
         rowCells[bRow] = std::move(bestBRowCells);
@@ -1754,7 +1895,8 @@ void Legalizer::refineDisplacementSwaps(double alpha) {
                                                : static_cast<int>(cells.size());
 
     vector<int> order(cells.size());
-    for (int i = 0; i < static_cast<int>(cells.size()); ++i) order[i] = i;
+    for (int i = 0; i < static_cast<int>(cells.size()); ++i)
+        order[i] = i;
 
     for (int pass = 0; pass < passes; ++pass) {
         if (runtimeLimitReached()) {
@@ -1765,7 +1907,8 @@ void Legalizer::refineDisplacementSwaps(double alpha) {
         stable_sort(order.begin(), order.end(), [&](int a, int b) {
             double da = displacementCost(a, placementX[a], placementY[a]);
             double db = displacementCost(b, placementX[b], placementY[b]);
-            if (fabs(da - db) > 1e-9) return da > db;
+            if (fabs(da - db) > 1e-9)
+                return da > db;
             return cells[a].name < cells[b].name;
         });
 
@@ -1798,8 +1941,8 @@ void Legalizer::refineDisplacementSwaps(double alpha) {
                         continue;
                     }
 
-                    double oldCost = oldIdxCost +
-                                     displacementCost(other, placementX[other], placementY[other]);
+                    double oldCost =
+                        oldIdxCost + displacementCost(other, placementX[other], placementY[other]);
                     double newCost = displacementCost(idx, placementX[other], placementY[other]) +
                                      displacementCost(other, placementX[idx], placementY[idx]);
                     double gain = oldCost - newCost;
@@ -1810,7 +1953,8 @@ void Legalizer::refineDisplacementSwaps(double alpha) {
                 }
             }
 
-            if (bestOther < 0) continue;
+            if (bestOther < 0)
+                continue;
 
             int a = idx;
             int b = bestOther;
@@ -1842,7 +1986,8 @@ void Legalizer::refineDisplacementSwaps(double alpha) {
         }
 
         updateBestPlacement(alpha);
-        if (swapped == 0) break;
+        if (swapped == 0)
+            break;
     }
 }
 
@@ -1850,15 +1995,16 @@ void Legalizer::refineRowSliding(double alpha) {
     int passes = cells.size() > 50000 ? 5 : 8;
     int maxBlock = cells.size() > 50000 ? 128 : 512;
 
-    auto moveBlock = [&](const vector<int> &rowCells, int lo, int hi, int deltaSites) {
-        for (int p = lo; p <= hi; ++p) removePlacedCell(rowCells[p]);
+    auto moveBlock = [&](const vector<int>& rowCells, int lo, int hi, int deltaSites) {
+        for (int p = lo; p <= hi; ++p)
+            removePlacedCell(rowCells[p]);
         for (int p = lo; p <= hi; ++p) {
             int idx = rowCells[p];
             restorePlacedCell(idx, placementRow[idx], placementSite[idx] + deltaSites);
         }
     };
 
-    auto blockGain = [&](const vector<int> &rowCells, int lo, int hi, int deltaSites) {
+    auto blockGain = [&](const vector<int>& rowCells, int lo, int hi, int deltaSites) {
         double oldCost = 0.0;
         double newCost = 0.0;
         for (int p = lo; p <= hi; ++p) {
@@ -1871,7 +2017,8 @@ void Legalizer::refineRowSliding(double alpha) {
     };
 
     auto medianShift = [&](vector<int> shifts, int maxShift) {
-        if (shifts.empty()) return 0;
+        if (shifts.empty())
+            return 0;
         size_t mid = shifts.size() / 2;
         nth_element(shifts.begin(), shifts.begin() + mid, shifts.end());
         return max(0, min(maxShift, shifts[mid]));
@@ -1885,21 +2032,23 @@ void Legalizer::refineRowSliding(double alpha) {
 
         bool changed = false;
         for (int r = 0; r < numRows; ++r) {
-            for (const Interval &seg : rows[r].freeSites) {
+            for (const Interval& seg : rows[r].freeSites) {
                 vector<int> rowCells;
                 int last = -3;
                 for (int s = seg.l; s < seg.r; ++s) {
                     int owner = siteOwner[static_cast<size_t>(r) * numSites + s];
-                    if (owner >= 0 && owner != last &&
-                        placementRow[owner] == r && cellHeightRows[owner] == 1) {
+                    if (owner >= 0 && owner != last && placementRow[owner] == r &&
+                        cellHeightRows[owner] == 1) {
                         rowCells.push_back(owner);
                     }
                     last = owner;
                 }
-                if (rowCells.empty()) continue;
+                if (rowCells.empty())
+                    continue;
 
                 stable_sort(rowCells.begin(), rowCells.end(), [&](int a, int b) {
-                    if (placementSite[a] != placementSite[b]) return placementSite[a] < placementSite[b];
+                    if (placementSite[a] != placementSite[b])
+                        return placementSite[a] < placementSite[b];
                     return cells[a].name < cells[b].name;
                 });
 
@@ -1916,7 +2065,8 @@ void Legalizer::refineRowSliding(double alpha) {
                         gapR = placementSite[right];
                     }
                     int gap = gapR - gapL;
-                    if (gap <= 0) continue;
+                    if (gap <= 0)
+                        continue;
 
                     int bestLo = -1;
                     int bestHi = -1;
@@ -1931,7 +2081,8 @@ void Legalizer::refineRowSliding(double alpha) {
                             int idx = rowCells[lo];
                             shifts.push_back(targetSites[idx] - placementSite[idx]);
                             int delta = medianShift(shifts, gap);
-                            if (delta <= 0) continue;
+                            if (delta <= 0)
+                                continue;
                             double gain = blockGain(rowCells, lo, hi, delta);
                             if (gain > bestGain) {
                                 bestGain = gain;
@@ -1950,7 +2101,8 @@ void Legalizer::refineRowSliding(double alpha) {
                             int idx = rowCells[hi];
                             shifts.push_back(placementSite[idx] - targetSites[idx]);
                             int delta = medianShift(shifts, gap);
-                            if (delta <= 0) continue;
+                            if (delta <= 0)
+                                continue;
                             double gain = blockGain(rowCells, lo, hi, -delta);
                             if (gain > bestGain) {
                                 bestGain = gain;
@@ -1975,12 +2127,14 @@ void Legalizer::refineRowSliding(double alpha) {
         }
 
         updateBestPlacement(alpha);
-        if (!changed) break;
+        if (!changed)
+            break;
     }
 }
 
 void Legalizer::refineBoundaryTouches(double alpha) {
-    if (cells.size() < 5000 || gridCols <= 0 || gridRows <= 0) return;
+    if (cells.size() < 5000 || gridCols <= 0 || gridRows <= 0)
+        return;
 
     double threshold = densityThreshold;
     double a = max(0.0, min(1.0, alpha));
@@ -2002,10 +2156,11 @@ void Legalizer::refineBoundaryTouches(double alpha) {
     };
 
     auto appendTouchedBins = [&](long long x, long long y, long long w, long long h,
-                                 vector<int> &bins) {
+                                 vector<int>& bins) {
         long long x2 = x + w;
         long long y2 = y + h;
-        if (x2 < gridLLX || x > gridURX || y2 < gridLLY || y > gridURY) return;
+        if (x2 < gridLLX || x > gridURX || y2 < gridLLY || y > gridURY)
+            return;
 
         int c0 = max(gridLineLowerBound(x, gridLLX, gridURX, gridSize, gridCols) - 1, 0);
         int c1 = min(gridLineUpperBound(x2, gridLLX, gridURX, gridSize, gridCols), gridCols);
@@ -2019,17 +2174,20 @@ void Legalizer::refineBoundaryTouches(double alpha) {
     };
 
     auto appendDensityBins = [&](long long x, long long y, long long w, long long h,
-                                 vector<pair<int, double>> &bins) {
+                                 vector<pair<int, double>>& bins) {
         long long x1 = max(x, gridLLX);
         long long y1 = max(y, gridLLY);
         long long x2 = min(x + w, gridURX);
         long long y2 = min(y + h, gridURY);
-        if (x1 >= x2 || y1 >= y2) return;
+        if (x1 >= x2 || y1 >= y2)
+            return;
 
         int c0 = static_cast<int>(max(0LL, floorDiv(x1 - gridLLX, gridSize)));
-        int c1 = static_cast<int>(min(static_cast<long long>(gridCols), ceilDiv(x2 - gridLLX, gridSize)));
+        int c1 = static_cast<int>(
+            min(static_cast<long long>(gridCols), ceilDiv(x2 - gridLLX, gridSize)));
         int r0 = static_cast<int>(max(0LL, floorDiv(y1 - gridLLY, gridSize)));
-        int r1 = static_cast<int>(min(static_cast<long long>(gridRows), ceilDiv(y2 - gridLLY, gridSize)));
+        int r1 = static_cast<int>(
+            min(static_cast<long long>(gridRows), ceilDiv(y2 - gridLLY, gridSize)));
 
         for (int r = r0; r < r1; ++r) {
             long long gy1 = gridLLY + static_cast<long long>(r) * gridSize;
@@ -2039,13 +2197,14 @@ void Legalizer::refineBoundaryTouches(double alpha) {
                 long long gx2 = min(gx1 + gridSize, gridURX);
                 long long ox = max(0LL, min(x + w, gx2) - max(x, gx1));
                 long long oy = max(0LL, min(y + h, gy2) - max(y, gy1));
-                if (ox <= 0 || oy <= 0) continue;
+                if (ox <= 0 || oy <= 0)
+                    continue;
                 bins.push_back({r * gridCols + c, static_cast<double>(ox) * oy});
             }
         }
     };
 
-    auto sortUnique = [](vector<int> &items) {
+    auto sortUnique = [](vector<int>& items) {
         sort(items.begin(), items.end());
         items.erase(unique(items.begin(), items.end()), items.end());
     };
@@ -2053,12 +2212,14 @@ void Legalizer::refineBoundaryTouches(double alpha) {
     vector<int> touchCounts(gridCount, 0);
     int totalTouched = 0;
     for (int i = 0; i < static_cast<int>(cells.size()); ++i) {
-        if (!cells[i].name.empty() && cells[i].name[0] == 'h') continue;
+        if (!cells[i].name.empty() && cells[i].name[0] == 'h')
+            continue;
         vector<int> bins;
         appendTouchedBins(placementX[i], placementY[i], cells[i].w, cells[i].h, bins);
         sortUnique(bins);
         for (int bin : bins) {
-            if (touchCounts[bin]++ == 0) ++totalTouched;
+            if (touchCounts[bin]++ == 0)
+                ++totalTouched;
         }
     }
 
@@ -2068,7 +2229,8 @@ void Legalizer::refineBoundaryTouches(double alpha) {
 
     int overflowCount = 0;
     for (int idx = 0; idx < static_cast<int>(gridCount); ++idx) {
-        if (countedOverflow(idx)) ++overflowCount;
+        if (countedOverflow(idx))
+            ++overflowCount;
     }
 
     double totalDisp = 0.0;
@@ -2077,17 +2239,21 @@ void Legalizer::refineBoundaryTouches(double alpha) {
     }
 
     vector<int> order(cells.size());
-    for (int i = 0; i < static_cast<int>(cells.size()); ++i) order[i] = i;
+    for (int i = 0; i < static_cast<int>(cells.size()); ++i)
+        order[i] = i;
     stable_sort(order.begin(), order.end(), [&](int lhs, int rhs) {
         double dl = displacementCost(lhs, placementX[lhs], placementY[lhs]);
         double dr = displacementCost(rhs, placementX[rhs], placementY[rhs]);
-        if (fabs(dl - dr) > 1e-9) return dl < dr;
+        if (fabs(dl - dr) > 1e-9)
+            return dl < dr;
         return cells[lhs].name < cells[rhs].name;
     });
 
-    auto addCandidate = [](vector<int> &items, int value, int lo, int hi) {
-        if (value < lo || value > hi) return;
-        if (find(items.begin(), items.end(), value) == items.end()) items.push_back(value);
+    auto addCandidate = [](vector<int>& items, int value, int lo, int hi) {
+        if (value < lo || value > hi)
+            return;
+        if (find(items.begin(), items.end(), value) == items.end())
+            items.push_back(value);
     };
 
     int moved = 0;
@@ -2099,16 +2265,19 @@ void Legalizer::refineBoundaryTouches(double alpha) {
         }
 
         int idx = order[pos];
-        if (!cells[idx].name.empty() && cells[idx].name[0] == 'h') continue;
+        if (!cells[idx].name.empty() && cells[idx].name[0] == 'h')
+            continue;
 
         int oldRow = placementRow[idx];
         int oldSite = placementSite[idx];
         long long oldX = placementX[idx];
         long long oldY = placementY[idx];
         double oldDisp = displacementCost(idx, oldX, oldY);
-        double oldDor = totalTouched == 0 ? 0.0 : static_cast<double>(overflowCount) / totalTouched * 100.0;
-        double oldScore = a * kDisplacementNormFactor * (totalDisp / static_cast<double>(cells.size())) +
-                          (1.0 - a) * oldDor;
+        double oldDor =
+            totalTouched == 0 ? 0.0 : static_cast<double>(overflowCount) / totalTouched * 100.0;
+        double oldScore =
+            a * kDisplacementNormFactor * (totalDisp / static_cast<double>(cells.size())) +
+            (1.0 - a) * oldDor;
 
         vector<int> oldTouched;
         vector<pair<int, double>> oldDensity;
@@ -2117,7 +2286,7 @@ void Legalizer::refineBoundaryTouches(double alpha) {
         sortUnique(oldTouched);
 
         vector<int> oldAffected = oldTouched;
-        for (const auto &[bin, area] : oldDensity) {
+        for (const auto& [bin, area] : oldDensity) {
             (void)area;
             oldAffected.push_back(bin);
         }
@@ -2128,14 +2297,17 @@ void Legalizer::refineBoundaryTouches(double alpha) {
         double savedTotalDisp = totalDisp;
 
         for (int bin : oldAffected) {
-            if (countedOverflow(bin)) --overflowCount;
+            if (countedOverflow(bin))
+                --overflowCount;
         }
         for (int bin : oldTouched) {
-            if (--touchCounts[bin] == 0) --totalTouched;
+            if (--touchCounts[bin] == 0)
+                --totalTouched;
         }
         removePlacedCell(idx);
         for (int bin : oldAffected) {
-            if (countedOverflow(bin)) ++overflowCount;
+            if (countedOverflow(bin))
+                ++overflowCount;
         }
 
         int maxStartRow = numRows - cellHeightRows[idx];
@@ -2151,12 +2323,14 @@ void Legalizer::refineBoundaryTouches(double alpha) {
             long long relStart = boundary - dieLLY;
             if (relStart % siteH == 0) {
                 int row = static_cast<int>(relStart / siteH);
-                if (abs(row - oldRow) <= 7) addCandidate(rowCandidates, row, 0, maxStartRow);
+                if (abs(row - oldRow) <= 7)
+                    addCandidate(rowCandidates, row, 0, maxStartRow);
             }
             long long relEnd = boundary - cells[idx].h - dieLLY;
             if (relEnd % siteH == 0) {
                 int row = static_cast<int>(relEnd / siteH);
-                if (abs(row - oldRow) <= 7) addCandidate(rowCandidates, row, 0, maxStartRow);
+                if (abs(row - oldRow) <= 7)
+                    addCandidate(rowCandidates, row, 0, maxStartRow);
             }
         }
 
@@ -2166,12 +2340,14 @@ void Legalizer::refineBoundaryTouches(double alpha) {
             long long relStart = boundary - dieLLX;
             if (relStart % siteW == 0) {
                 int site = static_cast<int>(relStart / siteW);
-                if (abs(site - oldSite) <= 80) addCandidate(siteCandidates, site, 0, maxStartSite);
+                if (abs(site - oldSite) <= 80)
+                    addCandidate(siteCandidates, site, 0, maxStartSite);
             }
             long long relEnd = boundary - cells[idx].w - dieLLX;
             if (relEnd % siteW == 0) {
                 int site = static_cast<int>(relEnd / siteW);
-                if (abs(site - oldSite) <= 80) addCandidate(siteCandidates, site, 0, maxStartSite);
+                if (abs(site - oldSite) <= 80)
+                    addCandidate(siteCandidates, site, 0, maxStartSite);
             }
         }
 
@@ -2185,8 +2361,10 @@ void Legalizer::refineBoundaryTouches(double alpha) {
 
         for (int row : rowCandidates) {
             for (int site : siteCandidates) {
-                if (row == oldRow && site == oldSite) continue;
-                if (!ownerCanPlace(idx, row, site)) continue;
+                if (row == oldRow && site == oldSite)
+                    continue;
+                if (!ownerCanPlace(idx, row, site))
+                    continue;
 
                 long long x = dieLLX + static_cast<long long>(site) * siteW;
                 long long y = dieLLY + static_cast<long long>(row) * siteH;
@@ -2197,7 +2375,7 @@ void Legalizer::refineBoundaryTouches(double alpha) {
                 sortUnique(newTouched);
 
                 vector<int> affected = newTouched;
-                for (const auto &[bin, area] : newDensity) {
+                for (const auto& [bin, area] : newDensity) {
                     (void)area;
                     affected.push_back(bin);
                 }
@@ -2205,33 +2383,42 @@ void Legalizer::refineBoundaryTouches(double alpha) {
 
                 int candidateTouched = totalTouched;
                 for (int bin : newTouched) {
-                    if (touchCounts[bin] == 0) ++candidateTouched;
+                    if (touchCounts[bin] == 0)
+                        ++candidateTouched;
                 }
-                if (candidateTouched == 0) continue;
+                if (candidateTouched == 0)
+                    continue;
 
                 int candidateOverflow = overflowCount;
                 for (int bin : affected) {
-                    if (countedOverflow(bin)) --candidateOverflow;
+                    if (countedOverflow(bin))
+                        --candidateOverflow;
                 }
 
                 for (int bin : affected) {
-                    bool hasTouch = touchCounts[bin] > 0 ||
-                                    find(newTouched.begin(), newTouched.end(), bin) != newTouched.end();
-                    if (!hasTouch) continue;
+                    bool hasTouch =
+                        touchCounts[bin] > 0 ||
+                        find(newTouched.begin(), newTouched.end(), bin) != newTouched.end();
+                    if (!hasTouch)
+                        continue;
 
                     double usedArea = gridAreaUsed[bin];
-                    for (const auto &[areaBin, addArea] : newDensity) {
-                        if (areaBin == bin) usedArea += addArea;
+                    for (const auto& [areaBin, addArea] : newDensity) {
+                        if (areaBin == bin)
+                            usedArea += addArea;
                     }
-                    if (overflowedWithArea(bin, usedArea)) ++candidateOverflow;
+                    if (overflowedWithArea(bin, usedArea))
+                        ++candidateOverflow;
                 }
 
                 double newDisp = displacementCost(idx, x, y);
                 double candidateTotalDisp = totalDisp - oldDisp + newDisp;
-                double candidateDor = static_cast<double>(candidateOverflow) / candidateTouched * 100.0;
-                double candidateScore = a * kDisplacementNormFactor *
-                                            (candidateTotalDisp / static_cast<double>(cells.size())) +
-                                        (1.0 - a) * candidateDor;
+                double candidateDor =
+                    static_cast<double>(candidateOverflow) / candidateTouched * 100.0;
+                double candidateScore =
+                    a * kDisplacementNormFactor *
+                        (candidateTotalDisp / static_cast<double>(cells.size())) +
+                    (1.0 - a) * candidateDor;
 
                 if (candidateScore < bestScore - 1e-9 ||
                     (fabs(candidateScore - bestScore) < 1e-9 && newDisp < oldDisp)) {
@@ -2248,38 +2435,45 @@ void Legalizer::refineBoundaryTouches(double alpha) {
 
         if (bestRow != oldRow || bestSite != oldSite) {
             restorePlacedCell(idx, bestRow, bestSite);
-            for (int bin : bestTouchedBins) ++touchCounts[bin];
+            for (int bin : bestTouchedBins)
+                ++touchCounts[bin];
             totalTouched = bestTouched;
             overflowCount = bestOverflow;
             totalDisp = bestTotalDisp;
             ++moved;
         } else {
             restorePlacedCell(idx, oldRow, oldSite);
-            for (int bin : oldTouched) ++touchCounts[bin];
+            for (int bin : oldTouched)
+                ++touchCounts[bin];
             totalTouched = savedTouched;
             overflowCount = savedOverflow;
             totalDisp = savedTotalDisp;
         }
 
-        if ((moved & 4095) == 4095) updateBestPlacement(alpha);
+        if ((moved & 4095) == 4095)
+            updateBestPlacement(alpha);
     }
 
     updateBestPlacement(alpha);
 }
 
 double Legalizer::estimateDensityPenalty(long long x, long long y, long long w, long long h) const {
-    if (gridCols <= 0 || gridRows <= 0) return 0.0;
+    if (gridCols <= 0 || gridRows <= 0)
+        return 0.0;
     double threshold = densityThreshold;
     long long x1 = max(x, gridLLX);
     long long y1 = max(y, gridLLY);
     long long x2 = min(x + w, gridURX);
     long long y2 = min(y + h, gridURY);
-    if (x1 >= x2 || y1 >= y2) return 0.0;
+    if (x1 >= x2 || y1 >= y2)
+        return 0.0;
 
     int c0 = static_cast<int>(max(0LL, floorDiv(x1 - gridLLX, gridSize)));
-    int c1 = static_cast<int>(min(static_cast<long long>(gridCols), ceilDiv(x2 - gridLLX, gridSize)));
+    int c1 =
+        static_cast<int>(min(static_cast<long long>(gridCols), ceilDiv(x2 - gridLLX, gridSize)));
     int r0 = static_cast<int>(max(0LL, floorDiv(y1 - gridLLY, gridSize)));
-    int r1 = static_cast<int>(min(static_cast<long long>(gridRows), ceilDiv(y2 - gridLLY, gridSize)));
+    int r1 =
+        static_cast<int>(min(static_cast<long long>(gridRows), ceilDiv(y2 - gridLLY, gridSize)));
     double penalty = 0.0;
     int touched = 0;
 
@@ -2291,12 +2485,16 @@ double Legalizer::estimateDensityPenalty(long long x, long long y, long long w, 
             long long gx2 = min(gx1 + gridSize, gridURX);
             long long ox = max(0LL, min(x + w, gx2) - max(x, gx1));
             long long oy = max(0LL, min(y + h, gy2) - max(y, gy1));
-            if (ox == 0 || oy == 0) continue;
-            if (gridExcluded[static_cast<size_t>(r) * gridCols + c]) continue;
+            if (ox == 0 || oy == 0)
+                continue;
+            if (gridExcluded[static_cast<size_t>(r) * gridCols + c])
+                continue;
             double gridArea = static_cast<double>(gx2 - gx1) * static_cast<double>(gy2 - gy1);
-            if (gridArea <= 0.0) continue;
+            if (gridArea <= 0.0)
+                continue;
             double addArea = static_cast<double>(ox) * oy;
-            double util = (gridAreaUsed[static_cast<size_t>(r) * gridCols + c] + addArea) / gridArea;
+            double util =
+                (gridAreaUsed[static_cast<size_t>(r) * gridCols + c] + addArea) / gridArea;
             penalty += max(0.0, util - threshold) * 100.0;
             ++touched;
         }
@@ -2309,12 +2507,14 @@ void Legalizer::occupy(int row, int site, int widthSites, int heightRows) {
     for (int rr = row; rr < row + heightRows; ++rr) {
         vector<Interval> next;
         next.reserve(rows[rr].freeSites.size() + 1);
-        for (const auto &seg : rows[rr].freeSites) {
+        for (const auto& seg : rows[rr].freeSites) {
             if (end <= seg.l || seg.r <= site) {
                 next.push_back(seg);
             } else {
-                if (seg.l < site) next.push_back({seg.l, site});
-                if (end < seg.r) next.push_back({end, seg.r});
+                if (seg.l < site)
+                    next.push_back({seg.l, site});
+                if (end < seg.r)
+                    next.push_back({end, seg.r});
             }
         }
         rows[rr].freeSites.swap(next);
@@ -2325,18 +2525,23 @@ void Legalizer::addCellToDensity(long long x, long long y, long long w, long lon
     addCellToDensityDelta(x, y, w, h, 1.0);
 }
 
-void Legalizer::addCellToDensityDelta(long long x, long long y, long long w, long long h, double sign) {
-    if (gridCols <= 0 || gridRows <= 0) return;
+void Legalizer::addCellToDensityDelta(long long x, long long y, long long w, long long h,
+                                      double sign) {
+    if (gridCols <= 0 || gridRows <= 0)
+        return;
     long long x1 = max(x, gridLLX);
     long long y1 = max(y, gridLLY);
     long long x2 = min(x + w, gridURX);
     long long y2 = min(y + h, gridURY);
-    if (x1 >= x2 || y1 >= y2) return;
+    if (x1 >= x2 || y1 >= y2)
+        return;
 
     int c0 = static_cast<int>(max(0LL, floorDiv(x1 - gridLLX, gridSize)));
-    int c1 = static_cast<int>(min(static_cast<long long>(gridCols), ceilDiv(x2 - gridLLX, gridSize)));
+    int c1 =
+        static_cast<int>(min(static_cast<long long>(gridCols), ceilDiv(x2 - gridLLX, gridSize)));
     int r0 = static_cast<int>(max(0LL, floorDiv(y1 - gridLLY, gridSize)));
-    int r1 = static_cast<int>(min(static_cast<long long>(gridRows), ceilDiv(y2 - gridLLY, gridSize)));
+    int r1 =
+        static_cast<int>(min(static_cast<long long>(gridRows), ceilDiv(y2 - gridLLY, gridSize)));
 
     for (int r = r0; r < r1; ++r) {
         long long gy1 = gridLLY + static_cast<long long>(r) * gridSize;
@@ -2346,10 +2551,12 @@ void Legalizer::addCellToDensityDelta(long long x, long long y, long long w, lon
             long long gx2 = min(gx1 + gridSize, gridURX);
             long long ox = max(0LL, min(x + w, gx2) - max(x, gx1));
             long long oy = max(0LL, min(y + h, gy2) - max(y, gy1));
-            if (gridExcluded[static_cast<size_t>(r) * gridCols + c]) continue;
-            double &used = gridAreaUsed[static_cast<size_t>(r) * gridCols + c];
+            if (gridExcluded[static_cast<size_t>(r) * gridCols + c])
+                continue;
+            double& used = gridAreaUsed[static_cast<size_t>(r) * gridCols + c];
             used += sign * static_cast<double>(ox) * oy;
-            if (used < 0.0 && used > -1e-6) used = 0.0;
+            if (used < 0.0 && used > -1e-6)
+                used = 0.0;
         }
     }
 }

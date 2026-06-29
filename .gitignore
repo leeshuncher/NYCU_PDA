@@ -1,1 +1,15 @@
 .DS_Store
+
+# Local build outputs
+FloorPlan/Lab2
+Partition/Lab1
+Placement/Legalizer
+RMST/RMST
+*.dSYM/
+
+# Local run outputs
+FloorPlan/*.out
+Partition/*.out
+Placement/*.out
+RMST/answer.dat
+RMST/.tmp_*.out

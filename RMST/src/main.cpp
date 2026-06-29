@@ -24,7 +24,7 @@ struct Edge {
 };
 
 class FastInput {
-public:
+  public:
     explicit FastInput(const char* path) : file_(std::fopen(path, "rb")) {
         if (file_ == nullptr) {
             throw std::runtime_error("cannot open input file");
@@ -54,9 +54,8 @@ public:
 
         std::uint64_t result = 0;
         const std::uint64_t limit =
-            sign < 0
-                ? static_cast<std::uint64_t>(std::numeric_limits<int64>::max()) + 1ULL
-                : static_cast<std::uint64_t>(std::numeric_limits<int64>::max());
+            sign < 0 ? static_cast<std::uint64_t>(std::numeric_limits<int64>::max()) + 1ULL
+                     : static_cast<std::uint64_t>(std::numeric_limits<int64>::max());
         bool has_digit = false;
         while (c >= '0' && c <= '9') {
             has_digit = true;
@@ -79,7 +78,7 @@ public:
         return true;
     }
 
-private:
+  private:
     static constexpr std::size_t kBufferSize = 1 << 20;
 
     int readChar() {
@@ -100,7 +99,7 @@ private:
 };
 
 class DisjointSet {
-public:
+  public:
     explicit DisjointSet(std::size_t n) : parent_(n), rank_(n, 0) {
         std::iota(parent_.begin(), parent_.end(), 0);
     }
@@ -134,13 +133,13 @@ public:
         return true;
     }
 
-private:
+  private:
     std::vector<int> parent_;
     std::vector<unsigned char> rank_;
 };
 
 class FenwickTree {
-public:
+  public:
     explicit FenwickTree(std::size_t n) : tree_(n + 1, 0), total_(0) {}
 
     void add(int index, int delta) {
@@ -158,7 +157,7 @@ public:
         return findByOrder(before + 1);
     }
 
-private:
+  private:
     int prefixCount(int count) const {
         int result = 0;
         for (int i = count; i > 0; i -= i & -i) {
@@ -190,27 +189,27 @@ private:
 
 static int64 transformedX(const Point& p, int dir) {
     switch (dir) {
-        case 0:
-            return p.x;
-        case 1:
-            return p.y;
-        case 2:
-            return -p.y;
-        default:
-            return p.x;
+    case 0:
+        return p.x;
+    case 1:
+        return p.y;
+    case 2:
+        return -p.y;
+    default:
+        return p.x;
     }
 }
 
 static int64 transformedY(const Point& p, int dir) {
     switch (dir) {
-        case 0:
-            return p.y;
-        case 1:
-            return p.x;
-        case 2:
-            return p.x;
-        default:
-            return -p.y;
+    case 0:
+        return p.y;
+    case 1:
+        return p.x;
+    case 2:
+        return p.x;
+    default:
+        return -p.y;
     }
 }
 
@@ -255,9 +254,8 @@ static std::vector<Point> readUniquePoints(const char* path) {
         return a.y < b.y;
     });
     points.erase(
-        std::unique(points.begin(), points.end(), [](const Point& a, const Point& b) {
-            return a.x == b.x && a.y == b.y;
-        }),
+        std::unique(points.begin(), points.end(),
+                    [](const Point& a, const Point& b) { return a.x == b.x && a.y == b.y; }),
         points.end());
     return points;
 }
@@ -304,8 +302,8 @@ static void addOctantCandidateEdges(const std::vector<Point>& points, std::vecto
             const int64 x = transformedX(points[id], dir);
             const int64 y = transformedY(points[id], dir);
             const int32_t key = activeKey(points[id], dir);
-            const int key_index = static_cast<int>(
-                std::lower_bound(keys.begin(), keys.end(), key) - keys.begin());
+            const int key_index =
+                static_cast<int>(std::lower_bound(keys.begin(), keys.end(), key) - keys.begin());
 
             int active_index = active_tree.nextAtOrAfter(key_index);
             while (active_index != -1) {

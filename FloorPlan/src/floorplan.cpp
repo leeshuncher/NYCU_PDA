@@ -32,8 +32,10 @@ void build_complete_binary_tree(vector<BNode>& tr, const vector<int>& nodes) {
         int cur = nodes[pos];
         int par = nodes[(pos - 1) / 2];
         tr[cur].par = par;
-        if (pos & 1) tr[par].left = cur;
-        else         tr[par].right = cur;
+        if (pos & 1)
+            tr[par].left = cur;
+        else
+            tr[par].right = cur;
     }
 }
 
@@ -46,12 +48,14 @@ struct Rect {
 void contour_split(Contour& c, double x) {
     auto it = c.seg.upper_bound(x);
     --it;
-    if (it->first + EPS < x) c.seg[x] = it->second;
+    if (it->first + EPS < x)
+        c.seg[x] = it->second;
 }
 
 void contour_normalize(Contour& c) {
-    for (auto it = next(c.seg.begin()); it != c.seg.end(); ) {
-        if (next(it) == c.seg.end()) break; // keep the sentinel boundary
+    for (auto it = next(c.seg.begin()); it != c.seg.end();) {
+        if (next(it) == c.seg.end())
+            break; // keep the sentinel boundary
         auto prev = it;
         --prev;
         if (fabs(prev->second - it->second) <= EPS) {
@@ -63,7 +67,8 @@ void contour_normalize(Contour& c) {
 }
 
 void append_profile_seg(vector<ProfileSeg>& prof, double l, double r, double y) {
-    if (l + EPS >= r) return;
+    if (l + EPS >= r)
+        return;
     if (!prof.empty() && fabs(prof.back().r - l) <= EPS && fabs(prof.back().y - y) <= EPS) {
         prof.back().r = r;
         return;
@@ -94,7 +99,8 @@ pair<vector<ProfileSeg>, vector<ProfileSeg>> extract_profiles(const vector<Rect>
                 max_y = max(max_y, rc.y + rc.h);
             }
         }
-        if (!isfinite(min_y)) continue;
+        if (!isfinite(min_y))
+            continue;
         append_profile_seg(bottom, l, r, min_y);
         append_profile_seg(top, l, r, max_y);
     }
@@ -102,7 +108,8 @@ pair<vector<ProfileSeg>, vector<ProfileSeg>> extract_profiles(const vector<Rect>
 }
 
 double query_profile(const Contour& c, double x0, const vector<ProfileSeg>& bottom) {
-    if (bottom.empty()) return 0;
+    if (bottom.empty())
+        return 0;
 
     double best_y = 0;
     for (const auto& seg : bottom) {
@@ -115,14 +122,16 @@ double query_profile(const Contour& c, double x0, const vector<ProfileSeg>& bott
             double next_x = min(end, next_it->first);
             best_y = max(best_y, it->second - seg.y);
             cur = next_x;
-            if (cur + EPS < end) it = next_it;
+            if (cur + EPS < end)
+                it = next_it;
         }
     }
     return max(best_y, 0.0);
 }
 
 void update_profile(Contour& c, double x0, const vector<ProfileSeg>& top, double base_y) {
-    if (top.empty()) return;
+    if (top.empty())
+        return;
 
     double l = x0 + top.front().l;
     double r = x0 + top.back().r;
@@ -145,36 +154,47 @@ void update_profile(Contour& c, double x0, const vector<ProfileSeg>& top, double
     for (int i = 0; i + 1 < (int)cuts.size(); i++) {
         double start = cuts[i];
         double end = cuts[i + 1];
-        if (start + EPS >= end) continue;
+        if (start + EPS >= end)
+            continue;
         double local_x = start - x0;
-        while (prof_idx + 1 < (int)top.size() && top[prof_idx].r <= local_x + EPS) ++prof_idx;
+        while (prof_idx + 1 < (int)top.size() && top[prof_idx].r <= local_x + EPS)
+            ++prof_idx;
         new_spans.push_back({start, base_y + top[prof_idx].y});
     }
 
     contour_split(c, l);
     contour_split(c, r);
     c.seg.erase(c.seg.find(l), c.seg.find(r));
-    for (const auto& span : new_spans) c.seg[span.first] = span.second;
+    for (const auto& span : new_spans)
+        c.seg[span.first] = span.second;
     contour_normalize(c);
 }
-}
+} // namespace
 
 // ─── Contour ────────────────────────────────────────────────────────────────
 
 double Contour::query(double x, double w) const {
-    auto it = seg.upper_bound(x); --it;
+    auto it = seg.upper_bound(x);
+    --it;
     double h = 0;
-    while (it->first < x + w - EPS) { h = max(h, it->second); ++it; }
+    while (it->first < x + w - EPS) {
+        h = max(h, it->second);
+        ++it;
+    }
     return h;
 }
 
 void Contour::update(double x, double w, double h) {
     // split at x
-    auto it = seg.upper_bound(x); --it;
-    if (it->first + EPS < x) seg[x] = it->second;
+    auto it = seg.upper_bound(x);
+    --it;
+    if (it->first + EPS < x)
+        seg[x] = it->second;
     // split at x+w
-    it = seg.upper_bound(x + w); --it;
-    if (it->first + EPS < x + w) seg[x + w] = it->second;
+    it = seg.upper_bound(x + w);
+    --it;
+    if (it->first + EPS < x + w)
+        seg[x + w] = it->second;
     // erase [x, x+w) and set height
     seg.erase(seg.find(x), seg.find(x + w));
     seg[x] = h;
@@ -184,13 +204,15 @@ void Contour::update(double x, double w, double h) {
 
 int Floorplan::hb_root() const {
     for (int i = 0; i < (int)hb.size(); i++)
-        if (hb[i].par == -1) return i;
+        if (hb[i].par == -1)
+            return i;
     return 0;
 }
 
 int Floorplan::asf_root(int g) const {
     for (int i = 0; i < (int)asf[g].size(); i++)
-        if (asf[g][i].par == -1) return i;
+        if (asf[g][i].par == -1)
+            return i;
     return 0;
 }
 
@@ -199,7 +221,8 @@ bool Floorplan::on_rb(const vector<BNode>& tr, int i) const {
     int cur = i;
     while (tr[cur].par != -1) {
         int p = tr[cur].par;
-        if (tr[p].right != cur) return false;
+        if (tr[p].right != cur)
+            return false;
         cur = p;
     }
     return true;
@@ -230,12 +253,14 @@ void Floorplan::detach(vector<BNode>& tr, int i) {
         // Both children: graft left subtree to leftmost position in right subtree
         repl = r;
         int lm = r;
-        while (tr[lm].left != -1) lm = tr[lm].left;
+        while (tr[lm].left != -1)
+            lm = tr[lm].left;
         tr[lm].left = l;
         tr[l].par = lm;
     }
 
-    if (repl != -1) tr[repl].par = p;
+    if (repl != -1)
+        tr[repl].par = p;
     if (p == -1) {
         // i was root; repl becomes new root
     } else if (tr[p].left == i) {
@@ -251,11 +276,13 @@ void Floorplan::detach(vector<BNode>& tr, int i) {
 // Existing child in that slot is pushed down to i's left child.
 void Floorplan::attach(vector<BNode>& tr, int i, int par, bool lft) {
     int existing = lft ? tr[par].left : tr[par].right;
-    if (lft) tr[par].left  = i;
-    else     tr[par].right = i;
+    if (lft)
+        tr[par].left = i;
+    else
+        tr[par].right = i;
     tr[i].par = par;
     if (existing != -1) {
-        tr[i].left    = existing;
+        tr[i].left = existing;
         tr[existing].par = i;
     }
 }
@@ -285,7 +312,8 @@ void Floorplan::init(unsigned int seed) {
         for (auto& pp : grps[g].pairs) {
             in_grp[pp.a] = in_grp[pp.b] = true;
         }
-        for (int m : grps[g].selfsym) in_grp[m] = true;
+        for (int m : grps[g].selfsym)
+            in_grp[m] = true;
     }
 
     auto rep_dims = [&](int g, int rep_id, SymType type) {
@@ -297,7 +325,8 @@ void Floorplan::init(unsigned int seed) {
         }
 
         int mid = grps[g].selfsym[rep_id - np];
-        if (type == SYM_VERT) return pair<double, double>{mods[mid].w / 2.0, mods[mid].h};
+        if (type == SYM_VERT)
+            return pair<double, double>{mods[mid].w / 2.0, mods[mid].h};
         return pair<double, double>{mods[mid].w, mods[mid].h / 2.0};
     };
 
@@ -310,11 +339,14 @@ void Floorplan::init(unsigned int seed) {
         double rh = rdim.second;
         double la = lw * lh;
         double ra = rw * rh;
-        if (la != ra) return la > ra;
+        if (la != ra)
+            return la > ra;
         double lmax = max(lw, lh), rmax = max(rw, rh);
-        if (fabs(lmax - rmax) > EPS) return lmax > rmax;
+        if (fabs(lmax - rmax) > EPS)
+            return lmax > rmax;
         double lmin = min(lw, lh), rmin = min(rw, rh);
-        if (fabs(lmin - rmin) > EPS) return lmin > rmin;
+        if (fabs(lmin - rmin) > EPS)
+            return lmin > rmin;
         return lhs < rhs;
     };
 
@@ -340,7 +372,8 @@ void Floorplan::init(unsigned int seed) {
              [&](int lhs, int rhs) { return rep_before(g, lhs, rhs, type); });
 
         vector<int> self_ids(ns);
-        for (int i = 0; i < ns; i++) self_ids[i] = np + i;
+        for (int i = 0; i < ns; i++)
+            self_ids[i] = np + i;
         sort(self_ids.begin(), self_ids.end(),
              [&](int lhs, int rhs) { return rep_before(g, lhs, rhs, type); });
 
@@ -401,8 +434,7 @@ void Floorplan::init(unsigned int seed) {
         }
 
         SymType best = SYM_VERT;
-        if (area_horiz < area_vert ||
-            (area_horiz == area_vert && span_horiz < span_vert)) {
+        if (area_horiz < area_vert || (area_horiz == area_vert && span_horiz < span_vert)) {
             best = SYM_HORIZ;
         }
 
@@ -415,12 +447,14 @@ void Floorplan::init(unsigned int seed) {
     vector<int> hb_ids;
     hb_ids.reserve(nm);
     for (int m = 0; m < nm; m++)
-        if (!in_grp[m]) hb_ids.push_back(m);
+        if (!in_grp[m])
+            hb_ids.push_back(m);
     for (int g = 0; g < ng; g++)
         hb_ids.push_back(-(g + 1));
 
     auto dims_of = [&](int id) {
-        if (id >= 0) return pair<double, double>{mods[id].w, mods[id].h};
+        if (id >= 0)
+            return pair<double, double>{mods[id].w, mods[id].h};
         int g = -(id + 1);
         return pair<double, double>{iw[g], ih[g]};
     };
@@ -434,11 +468,14 @@ void Floorplan::init(unsigned int seed) {
         double rh = rdim.second;
         double la = lw * lh;
         double ra = rw * rh;
-        if (fabs(la - ra) > EPS) return la > ra;
+        if (fabs(la - ra) > EPS)
+            return la > ra;
         double lmax = max(lw, lh), rmax = max(rw, rh);
-        if (fabs(lmax - rmax) > EPS) return lmax > rmax;
+        if (fabs(lmax - rmax) > EPS)
+            return lmax > rmax;
         double lmin = min(lw, lh), rmin = min(rw, rh);
-        if (fabs(lmin - rmin) > EPS) return lmin > rmin;
+        if (fabs(lmin - rmin) > EPS)
+            return lmin > rmin;
         return lhs < rhs;
     };
 
@@ -457,8 +494,10 @@ void Floorplan::init(unsigned int seed) {
         trial[idx].par = par;
 
         int existing = lft ? trial[par].left : trial[par].right;
-        if (lft) trial[par].left = idx;
-        else     trial[par].right = idx;
+        if (lft)
+            trial[par].left = idx;
+        else
+            trial[par].right = idx;
         if (existing != -1) {
             trial[idx].left = existing;
             trial[existing].par = idx;
@@ -468,7 +507,8 @@ void Floorplan::init(unsigned int seed) {
 
     auto build_greedy_hb = [&](const vector<int>& order) {
         vector<BNode> cur;
-        if (order.empty()) return cur;
+        if (order.empty())
+            return cur;
 
         cur.push_back(BNode());
         cur[0].id = order[0];
@@ -498,7 +538,8 @@ void Floorplan::init(unsigned int seed) {
         clear_tree_links(tree);
         if (ids.size() > 24)
             sort(ids.begin(), ids.end(), hb_before);
-        for (int i = 0; i < (int)ids.size(); i++) tree[i].id = ids[i];
+        for (int i = 0; i < (int)ids.size(); i++)
+            tree[i].id = ids[i];
         if (tree.size() > 24) {
             vector<int> hb_nodes(tree.size());
             iota(hb_nodes.begin(), hb_nodes.end(), 0);
@@ -516,7 +557,8 @@ void Floorplan::init(unsigned int seed) {
     vector<vector<int>> orders;
     auto add_order = [&](vector<int> order) {
         for (const auto& old : orders)
-            if (old == order) return;
+            if (old == order)
+                return;
         orders.push_back(std::move(order));
     };
 
@@ -530,7 +572,8 @@ void Floorplan::init(unsigned int seed) {
     sort(order.begin(), order.end(), [&](int lhs, int rhs) {
         pair<double, double> ldim = dims_of(lhs);
         pair<double, double> rdim = dims_of(rhs);
-        if (ldim.first != rdim.first) return ldim.first > rdim.first;
+        if (ldim.first != rdim.first)
+            return ldim.first > rdim.first;
         return hb_before(lhs, rhs);
     });
     add_order(order);
@@ -539,7 +582,8 @@ void Floorplan::init(unsigned int seed) {
     sort(order.begin(), order.end(), [&](int lhs, int rhs) {
         pair<double, double> ldim = dims_of(lhs);
         pair<double, double> rdim = dims_of(rhs);
-        if (ldim.second != rdim.second) return ldim.second > rdim.second;
+        if (ldim.second != rdim.second)
+            return ldim.second > rdim.second;
         return hb_before(lhs, rhs);
     });
     add_order(order);
@@ -550,7 +594,8 @@ void Floorplan::init(unsigned int seed) {
         pair<double, double> rdim = dims_of(rhs);
         int lspan = max(ldim.first, ldim.second);
         int rspan = max(rdim.first, rdim.second);
-        if (lspan != rspan) return lspan > rspan;
+        if (lspan != rspan)
+            return lspan > rspan;
         return hb_before(lhs, rhs);
     });
     add_order(order);
@@ -561,7 +606,8 @@ void Floorplan::init(unsigned int seed) {
         pair<double, double> rdim = dims_of(rhs);
         double lratio = max(ldim.first, ldim.second) * min(rdim.first, rdim.second);
         double rratio = max(rdim.first, rdim.second) * min(ldim.first, ldim.second);
-        if (fabs(lratio - rratio) > EPS) return lratio > rratio;
+        if (fabs(lratio - rratio) > EPS)
+            return lratio > rratio;
         return hb_before(lhs, rhs);
     });
     add_order(order);
@@ -622,24 +668,27 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
             in_grp[pp.a] = true;
             in_grp[pp.b] = true;
         }
-        for (int m : grps[g].selfsym) in_grp[m] = true;
+        for (int m : grps[g].selfsym)
+            in_grp[m] = true;
     }
 
     auto axis_dims = [&](int mid, SymType type) {
-        if (type == SYM_VERT) return pair<double, double>{mods[mid].w, mods[mid].h};
+        if (type == SYM_VERT)
+            return pair<double, double>{mods[mid].w, mods[mid].h};
         return pair<double, double>{mods[mid].h, mods[mid].w};
     };
 
     auto axis_dims_oriented = [&](int mid, SymType type, bool rot) {
         double w = mods[mid].w;
         double h = mods[mid].h;
-        if (rot) swap(w, h);
-        if (type == SYM_VERT) return pair<double, double>{w, h};
+        if (rot)
+            swap(w, h);
+        if (type == SYM_VERT)
+            return pair<double, double>{w, h};
         return pair<double, double>{h, w};
     };
 
-    auto add_actual_rect = [&](vector<Rect>& rects, int mid, double u, double v,
-                               SymType type) {
+    auto add_actual_rect = [&](vector<Rect>& rects, int mid, double u, double v, SymType type) {
         if (type == SYM_VERT) {
             mods[mid].x = u;
             mods[mid].y = v;
@@ -656,38 +705,43 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
         xs.reserve(c.seg.size() + 2);
         xs.push_back(0);
         xs.push_back(max_u);
-        if (target_u >= width) xs.push_back(target_u - width);
+        if (target_u >= width)
+            xs.push_back(target_u - width);
         for (const auto& kv : c.seg) {
-            if (kv.first >= 1e90) break;
+            if (kv.first >= 1e90)
+                break;
             xs.push_back(kv.first);
             xs.push_back(kv.first - width);
         }
         double limit = max(max_u, target_u);
-        if (limit < 0) limit = max_u;
-        xs.erase(remove_if(xs.begin(), xs.end(),
-                           [&](double x) { return x < -EPS || x > limit + EPS; }),
-                 xs.end());
+        if (limit < 0)
+            limit = max_u;
+        xs.erase(
+            remove_if(xs.begin(), xs.end(), [&](double x) { return x < -EPS || x > limit + EPS; }),
+            xs.end());
         sort(xs.begin(), xs.end());
         xs.erase(unique(xs.begin(), xs.end()), xs.end());
         return xs;
     };
 
     auto collect_profile_candidates = [&](const Contour& c, double max_u,
-                                          const vector<ProfileSeg>& bottom,
-                                          double width, double target_u = -1) {
+                                          const vector<ProfileSeg>& bottom, double width,
+                                          double target_u = -1) {
         vector<double> xs = collect_candidates(c, max_u, width, target_u);
         double limit = max(max_u, target_u);
-        if (limit < 0) limit = max_u;
+        if (limit < 0)
+            limit = max_u;
         for (const auto& kv : c.seg) {
-            if (kv.first >= 1e90) break;
+            if (kv.first >= 1e90)
+                break;
             for (const auto& seg : bottom) {
                 xs.push_back(kv.first - seg.l);
                 xs.push_back(kv.first - seg.r);
             }
         }
-        xs.erase(remove_if(xs.begin(), xs.end(),
-                           [&](double x) { return x < -EPS || x > limit + EPS; }),
-                 xs.end());
+        xs.erase(
+            remove_if(xs.begin(), xs.end(), [&](double x) { return x < -EPS || x > limit + EPS; }),
+            xs.end());
         sort(xs.begin(), xs.end());
         xs.erase(unique(xs.begin(), xs.end()), xs.end());
         return xs;
@@ -723,8 +777,10 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
             auto rd = axis_dims(grp.selfsym[rhs], type);
             double la = ld.first * ld.second;
             double ra = rd.first * rd.second;
-            if (fabs(la - ra) > EPS) return la > ra;
-            if (fabs(ld.second - rd.second) > EPS) return ld.second > rd.second;
+            if (fabs(la - ra) > EPS)
+                return la > ra;
+            if (fabs(ld.second - rd.second) > EPS)
+                return ld.second > rd.second;
             return ld.first > rd.first;
         });
 
@@ -734,7 +790,8 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
             double best_score = numeric_limits<double>::infinity();
             double best_v = 0;
             for (int rot = 0; rot < 2; rot++) {
-                if (rot && fabs(mods[mid].w - mods[mid].h) <= EPS) continue;
+                if (rot && fabs(mods[mid].w - mods[mid].h) <= EPS)
+                    continue;
                 auto dim = axis_dims_oriented(mid, type, rot != 0);
                 double du = dim.first / 2.0;
                 double dv = dim.second;
@@ -745,11 +802,9 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
                 double next_v = max(max_v, v + dv);
                 double next_span = next_left + next_right;
                 double overflow = (target_span > 0) ? max(0.0, next_span - target_span) : 0.0;
-                double score = (target_span > 0)
-                                   ? (1e9 * overflow + 1e6 * next_v + next_span)
-                                   : (next_span * next_v);
-                if (score < best_score - EPS ||
-                    (fabs(score - best_score) <= EPS && v < best_v)) {
+                double score = (target_span > 0) ? (1e9 * overflow + 1e6 * next_v + next_span)
+                                                 : (next_span * next_v);
+                if (score < best_score - EPS || (fabs(score - best_score) <= EPS && v < best_v)) {
                     best_score = score;
                     best_v = v;
                     item.idx = self_idx;
@@ -761,7 +816,8 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
                     item.rot = rot != 0;
                 }
             }
-            if (item.rot) rotate_module(mods[mid]);
+            if (item.rot)
+                rotate_module(mods[mid]);
             half.update(0, item.du, item.v + item.dv);
 
             self_place.push_back(item);
@@ -774,18 +830,18 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
         vector<int> pair_order(grp.pairs.size());
         iota(pair_order.begin(), pair_order.end(), 0);
         sort(pair_order.begin(), pair_order.end(), [&](int lhs, int rhs) {
-            int lmid = (grp.pairs[lhs].rep == 0) ? grp.pairs[lhs].a
-                                                 : grp.pairs[lhs].b;
-            int rmid = (grp.pairs[rhs].rep == 0) ? grp.pairs[rhs].a
-                                                 : grp.pairs[rhs].b;
+            int lmid = (grp.pairs[lhs].rep == 0) ? grp.pairs[lhs].a : grp.pairs[lhs].b;
+            int rmid = (grp.pairs[rhs].rep == 0) ? grp.pairs[rhs].a : grp.pairs[rhs].b;
             auto ld = axis_dims(lmid, type);
             auto rd = axis_dims(rmid, type);
             double la = ld.first * ld.second;
             double ra = rd.first * rd.second;
-            if (fabs(la - ra) > EPS) return la > ra;
+            if (fabs(la - ra) > EPS)
+                return la > ra;
             double lspan = max(ld.first, ld.second);
             double rspan = max(rd.first, rd.second);
-            if (fabs(lspan - rspan) > EPS) return lspan > rspan;
+            if (fabs(lspan - rspan) > EPS)
+                return lspan > rspan;
             return lhs < rhs;
         });
 
@@ -798,7 +854,8 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
             double best_v = 0;
             AxisItem item;
             for (int rot = 0; rot < 2; rot++) {
-                if (rot && fabs(mods[mid].w - mods[mid].h) <= EPS) continue;
+                if (rot && fabs(mods[mid].w - mods[mid].h) <= EPS)
+                    continue;
                 auto dim = axis_dims_oriented(mid, type, rot != 0);
                 double du = dim.first;
                 double dv = dim.second;
@@ -811,9 +868,8 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
                     double next_v = max(max_v, cand_v + dv);
                     double next_span = next_left + next_right;
                     double overflow = (target_span > 0) ? max(0.0, next_span - target_span) : 0.0;
-                    double score = (target_span > 0)
-                                       ? (1e9 * overflow + 1e6 * next_v + next_span)
-                                       : (next_span * next_v);
+                    double score = (target_span > 0) ? (1e9 * overflow + 1e6 * next_v + next_span)
+                                                     : (next_span * next_v);
                     if (score < best_score - EPS ||
                         (fabs(score - best_score) <= EPS &&
                          (cand_v < best_v || (fabs(cand_v - best_v) <= EPS && cand_u < best_u)))) {
@@ -843,11 +899,15 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
         };
 
         if (mode == 0) {
-            for (int self_idx : self_order) place_self(self_idx);
-            for (int pair_idx : pair_order) place_pair(pair_idx);
+            for (int self_idx : self_order)
+                place_self(self_idx);
+            for (int pair_idx : pair_order)
+                place_pair(pair_idx);
         } else if (mode == 1) {
-            for (int pair_idx : pair_order) place_pair(pair_idx);
-            for (int self_idx : self_order) place_self(self_idx);
+            for (int pair_idx : pair_order)
+                place_pair(pair_idx);
+            for (int self_idx : self_order)
+                place_self(self_idx);
         } else {
             struct GroupItem {
                 bool self = false;
@@ -883,23 +943,28 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
             }
 
             if (mode < 6) {
-                sort(items.begin(), items.end(), [&](const GroupItem& lhs,
-                                                     const GroupItem& rhs) {
+                sort(items.begin(), items.end(), [&](const GroupItem& lhs, const GroupItem& rhs) {
                     if (mode == 2) {
-                        if (fabs(lhs.area - rhs.area) > EPS) return lhs.area > rhs.area;
+                        if (fabs(lhs.area - rhs.area) > EPS)
+                            return lhs.area > rhs.area;
                     } else if (mode == 3) {
-                        if (fabs(lhs.h - rhs.h) > EPS) return lhs.h > rhs.h;
+                        if (fabs(lhs.h - rhs.h) > EPS)
+                            return lhs.h > rhs.h;
                     } else if (mode == 4) {
-                        if (fabs(lhs.w - rhs.w) > EPS) return lhs.w > rhs.w;
+                        if (fabs(lhs.w - rhs.w) > EPS)
+                            return lhs.w > rhs.w;
                     } else {
                         double lspan = max(lhs.w, lhs.h);
                         double rspan = max(rhs.w, rhs.h);
-                        if (fabs(lspan - rspan) > EPS) return lspan > rspan;
+                        if (fabs(lspan - rspan) > EPS)
+                            return lspan > rspan;
                     }
                     double lmin = min(lhs.w, lhs.h);
                     double rmin = min(rhs.w, rhs.h);
-                    if (fabs(lmin - rmin) > EPS) return lmin > rmin;
-                    if (lhs.self != rhs.self) return !lhs.self;
+                    if (fabs(lmin - rmin) > EPS)
+                        return lmin > rmin;
+                    if (lhs.self != rhs.self)
+                        return !lhs.self;
                     return lhs.idx < rhs.idx;
                 });
             } else {
@@ -908,8 +973,10 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
             }
 
             for (const auto& item : items) {
-                if (item.self) place_self(item.idx);
-                else           place_pair(item.idx);
+                if (item.self)
+                    place_self(item.idx);
+                else
+                    place_pair(item.idx);
             }
         }
 
@@ -983,9 +1050,8 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
                     double area = stitch_group(g, type, mode, target_span);
                     double span = max(iw[g], ih[g]);
                     double best_span = max(best_w, best_h);
-                    if (area < best_area - EPS ||
-                        (fabs(area - best_area) <= EPS &&
-                         (!isfinite(best_area) || span < best_span))) {
+                    if (area < best_area - EPS || (fabs(area - best_area) <= EPS &&
+                                                   (!isfinite(best_area) || span < best_span))) {
                         best_area = area;
                         best_type = type;
                         best_w = iw[g];
@@ -1010,10 +1076,12 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
     vector<int> item_ids;
     item_ids.reserve(nm + ng);
     for (int g = 0; g < ng; g++) {
-        if (iw[g] > 0 && ih[g] > 0) item_ids.push_back(-(g + 1));
+        if (iw[g] > 0 && ih[g] > 0)
+            item_ids.push_back(-(g + 1));
     }
     for (int m = 0; m < nm; m++) {
-        if (!in_grp[m]) item_ids.push_back(m);
+        if (!in_grp[m])
+            item_ids.push_back(m);
     }
     if (item_ids.empty()) {
         packed_w = packed_h = 0;
@@ -1022,7 +1090,8 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
     }
 
     auto item_dims = [&](int id) {
-        if (id >= 0) return pair<double, double>{base_mods[id].w, base_mods[id].h};
+        if (id >= 0)
+            return pair<double, double>{base_mods[id].w, base_mods[id].h};
         int g = -(id + 1);
         return pair<double, double>{iw[g], ih[g]};
     };
@@ -1032,20 +1101,24 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
         auto rd = item_dims(rhs);
         double la = ld.first * ld.second;
         double ra = rd.first * rd.second;
-        if (fabs(la - ra) > EPS) return la > ra;
+        if (fabs(la - ra) > EPS)
+            return la > ra;
         double lspan = max(ld.first, ld.second);
         double rspan = max(rd.first, rd.second);
-        if (fabs(lspan - rspan) > EPS) return lspan > rspan;
+        if (fabs(lspan - rspan) > EPS)
+            return lspan > rspan;
         double lmin = min(ld.first, ld.second);
         double rmin = min(rd.first, rd.second);
-        if (fabs(lmin - rmin) > EPS) return lmin > rmin;
+        if (fabs(lmin - rmin) > EPS)
+            return lmin > rmin;
         return lhs < rhs;
     };
 
     vector<vector<int>> orders;
     auto add_order = [&](vector<int> order) {
         for (const auto& old : orders)
-            if (old == order) return;
+            if (old == order)
+                return;
         orders.push_back(std::move(order));
     };
 
@@ -1057,7 +1130,8 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
     sort(order.begin(), order.end(), [&](int lhs, int rhs) {
         auto ld = item_dims(lhs);
         auto rd = item_dims(rhs);
-        if (fabs(ld.second - rd.second) > EPS) return ld.second > rd.second;
+        if (fabs(ld.second - rd.second) > EPS)
+            return ld.second > rd.second;
         return item_before(lhs, rhs);
     });
     add_order(order);
@@ -1066,36 +1140,8 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
     sort(order.begin(), order.end(), [&](int lhs, int rhs) {
         auto ld = item_dims(lhs);
         auto rd = item_dims(rhs);
-        if (fabs(ld.first - rd.first) > EPS) return ld.first > rd.first;
-        return item_before(lhs, rhs);
-    });
-    add_order(order);
-
-    order = item_ids;
-    sort(order.begin(), order.end(), [&](int lhs, int rhs) {
-        auto ld = item_dims(lhs);
-        auto rd = item_dims(rhs);
-        double lratio = max(ld.first, ld.second) * min(rd.first, rd.second);
-        double rratio = max(rd.first, rd.second) * min(ld.first, ld.second);
-        if (fabs(lratio - rratio) > EPS) return lratio > rratio;
-        return item_before(lhs, rhs);
-    });
-    add_order(order);
-
-    order = item_ids;
-    sort(order.begin(), order.end(), [&](int lhs, int rhs) {
-        auto ld = item_dims(lhs);
-        auto rd = item_dims(rhs);
-        if (fabs(ld.second - rd.second) > EPS) return ld.second < rd.second;
-        return item_before(lhs, rhs);
-    });
-    add_order(order);
-
-    order = item_ids;
-    sort(order.begin(), order.end(), [&](int lhs, int rhs) {
-        auto ld = item_dims(lhs);
-        auto rd = item_dims(rhs);
-        if (fabs(ld.first - rd.first) > EPS) return ld.first < rd.first;
+        if (fabs(ld.first - rd.first) > EPS)
+            return ld.first > rd.first;
         return item_before(lhs, rhs);
     });
     add_order(order);
@@ -1106,7 +1152,40 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
         auto rd = item_dims(rhs);
         double lratio = max(ld.first, ld.second) * min(rd.first, rd.second);
         double rratio = max(rd.first, rd.second) * min(ld.first, ld.second);
-        if (fabs(lratio - rratio) > EPS) return lratio < rratio;
+        if (fabs(lratio - rratio) > EPS)
+            return lratio > rratio;
+        return item_before(lhs, rhs);
+    });
+    add_order(order);
+
+    order = item_ids;
+    sort(order.begin(), order.end(), [&](int lhs, int rhs) {
+        auto ld = item_dims(lhs);
+        auto rd = item_dims(rhs);
+        if (fabs(ld.second - rd.second) > EPS)
+            return ld.second < rd.second;
+        return item_before(lhs, rhs);
+    });
+    add_order(order);
+
+    order = item_ids;
+    sort(order.begin(), order.end(), [&](int lhs, int rhs) {
+        auto ld = item_dims(lhs);
+        auto rd = item_dims(rhs);
+        if (fabs(ld.first - rd.first) > EPS)
+            return ld.first < rd.first;
+        return item_before(lhs, rhs);
+    });
+    add_order(order);
+
+    order = item_ids;
+    sort(order.begin(), order.end(), [&](int lhs, int rhs) {
+        auto ld = item_dims(lhs);
+        auto rd = item_dims(rhs);
+        double lratio = max(ld.first, ld.second) * min(rd.first, rd.second);
+        double rratio = max(rd.first, rd.second) * min(ld.first, ld.second);
+        if (fabs(lratio - rratio) > EPS)
+            return lratio < rratio;
         return item_before(lhs, rhs);
     });
     add_order(order);
@@ -1127,14 +1206,16 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
         widest_item = max(widest_item, dim.first);
         widest_item = max(widest_item, dim.second);
     }
-    for (const auto& mod : mods) total_module_area += mod.w * mod.h;
+    for (const auto& mod : mods)
+        total_module_area += mod.w * mod.h;
     double base_target_w = max(widest_item, sqrt(total_module_area));
     vector<double> target_widths;
     for (int pct : {90, 110, 130, 150, 175, 190, 205, 210}) {
         double target = max(widest_item, base_target_w * pct / 100.0);
         for (int delta : {-3, -2, -1, 0, 1, 2, 3}) {
             double near_target = max(widest_item, target + delta);
-            if (find(target_widths.begin(), target_widths.end(), near_target) == target_widths.end())
+            if (find(target_widths.begin(), target_widths.end(), near_target) ==
+                target_widths.end())
                 target_widths.push_back(near_target);
         }
     }
@@ -1193,7 +1274,8 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
                 for (int rot = 0; rot < 2; rot++) {
                     double w = rot ? mods[id].h : mods[id].w;
                     double h = rot ? mods[id].w : mods[id].h;
-                    if (rot && fabs(w - h) <= EPS) continue;
+                    if (rot && fabs(w - h) <= EPS)
+                        continue;
                     vector<double> rect_candidates = collect_candidates(c, max_x, w, target_w);
                     for (double x : rect_candidates) {
                         double y = c.query(x, w);
@@ -1201,7 +1283,8 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
                     }
                 }
 
-                if (best.rot) rotate_module(mods[id]);
+                if (best.rot)
+                    rotate_module(mods[id]);
                 mods[id].x = best.x;
                 mods[id].y = best.y;
                 c.update(best.x, best.w, best.y + best.h);
@@ -1257,8 +1340,7 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
             double span = max(packed_w, packed_h);
             double best_span = max(best_w, best_h);
             if (area < best_area - EPS ||
-                (fabs(area - best_area) <= EPS &&
-                 (!isfinite(best_area) || span < best_span))) {
+                (fabs(area - best_area) <= EPS && (!isfinite(best_area) || span < best_span))) {
                 best_area = area;
                 best_w = packed_w;
                 best_h = packed_h;
@@ -1286,13 +1368,15 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
                 members.push_back(pp.a);
                 members.push_back(pp.b);
             }
-            for (int m : grps[g].selfsym) members.push_back(m);
+            for (int m : grps[g].selfsym)
+                members.push_back(m);
         }
         return members;
     };
 
     auto move_item = [&](int id, double dx, double dy) {
-        if (fabs(dx) <= EPS && fabs(dy) <= EPS) return;
+        if (fabs(dx) <= EPS && fabs(dy) <= EPS)
+            return;
         vector<int> members = members_of(id);
         for (int m : members) {
             mods[m].x += dx;
@@ -1319,12 +1403,14 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
 
     auto item_min_x = [&](int id) {
         double v = numeric_limits<double>::infinity();
-        for (int m : members_of(id)) v = min(v, mods[m].x);
+        for (int m : members_of(id))
+            v = min(v, mods[m].x);
         return v;
     };
     auto item_min_y = [&](int id) {
         double v = numeric_limits<double>::infinity();
-        for (int m : members_of(id)) v = min(v, mods[m].y);
+        for (int m : members_of(id))
+            v = min(v, mods[m].y);
         return v;
     };
 
@@ -1333,7 +1419,8 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
         sort(order_x.begin(), order_x.end(), [&](int lhs, int rhs) {
             double lx = item_min_x(lhs);
             double rx = item_min_x(rhs);
-            if (fabs(lx - rx) > EPS) return lx < rx;
+            if (fabs(lx - rx) > EPS)
+                return lx < rx;
             return lhs < rhs;
         });
 
@@ -1350,7 +1437,8 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
             for (int m : members) {
                 const Module& a = mods[m];
                 for (int o = 0; o < nm; o++) {
-                    if (moving[o]) continue;
+                    if (moving[o])
+                        continue;
                     const Module& b = mods[o];
                     bool y_overlap = max(a.y, b.y) < min(a.y + a.h, b.y + b.h) - EPS;
                     if (y_overlap && b.x + b.w <= a.x + EPS) {
@@ -1358,14 +1446,16 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
                     }
                 }
             }
-            if (dx < -EPS) move_item(id, dx, 0);
+            if (dx < -EPS)
+                move_item(id, dx, 0);
         }
 
         vector<int> order_y = item_ids;
         sort(order_y.begin(), order_y.end(), [&](int lhs, int rhs) {
             double ly = item_min_y(lhs);
             double ry = item_min_y(rhs);
-            if (fabs(ly - ry) > EPS) return ly < ry;
+            if (fabs(ly - ry) > EPS)
+                return ly < ry;
             return lhs < rhs;
         });
 
@@ -1382,7 +1472,8 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
             for (int m : members) {
                 const Module& a = mods[m];
                 for (int o = 0; o < nm; o++) {
-                    if (moving[o]) continue;
+                    if (moving[o])
+                        continue;
                     const Module& b = mods[o];
                     bool x_overlap = max(a.x, b.x) < min(a.x + a.w, b.x + b.w) - EPS;
                     if (x_overlap && b.y + b.h <= a.y + EPS) {
@@ -1390,7 +1481,8 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
                     }
                 }
             }
-            if (dy < -EPS) move_item(id, 0, dy);
+            if (dy < -EPS)
+                move_item(id, 0, dy);
         }
     }
     recompute_bbox();
@@ -1401,7 +1493,7 @@ void Floorplan::greedy_pack_large(unsigned int seed) {
 void Floorplan::pack_asf(int g) {
     SymGroup& grp = grps[g];
     vector<BNode>& nd = asf[g];
-    int n  = nd.size();
+    int n = nd.size();
     int np = (int)grp.pairs.size();
     int ns = (int)grp.selfsym.size();
     if (n == 0) {
@@ -1435,7 +1527,8 @@ void Floorplan::pack_asf(int g) {
 
     // Transpose for horizontal packing (swap w↔h, pack as vertical, swap x↔y after)
     if (horiz)
-        for (int j = 0; j < n; j++) swap(rw[j], rh[j]);
+        for (int j = 0; j < n; j++)
+            swap(rw[j], rh[j]);
 
     // Pack representative B*-tree
     int root = asf_root(g);
@@ -1447,7 +1540,8 @@ void Floorplan::pack_asf(int g) {
     stack<int> stk;
     stk.push(root);
     while (!stk.empty()) {
-        int i = stk.top(); stk.pop();
+        int i = stk.top();
+        stk.pop();
         int j = nd[i].id; // rep index
 
         double x;
@@ -1459,18 +1553,24 @@ void Floorplan::pack_asf(int g) {
             x = (nd[p].left == i) ? (rx[p] + rw[pj]) : rx[p];
         }
         double y = c.query(x, rw[j]);
-        rx[i] = x; ry[i] = y;
-        nd[i].pw = rw[j]; nd[i].ph = rh[j];
+        rx[i] = x;
+        ry[i] = y;
+        nd[i].pw = rw[j];
+        nd[i].ph = rh[j];
         c.update(x, rw[j], y + rh[j]);
 
-        if (nd[i].right != -1) stk.push(nd[i].right);
-        if (nd[i].left  != -1) stk.push(nd[i].left);
+        if (nd[i].right != -1)
+            stk.push(nd[i].right);
+        if (nd[i].left != -1)
+            stk.push(nd[i].left);
     }
 
     // Untranspose
     if (horiz) {
-        for (int i = 0; i < n; i++) swap(rx[i], ry[i]);
-        for (int j = 0; j < n; j++) swap(rw[j], rh[j]);
+        for (int i = 0; i < n; i++)
+            swap(rx[i], ry[i]);
+        for (int j = 0; j < n; j++)
+            swap(rw[j], rh[j]);
     }
 
     // Compute shift so all module positions are non-negative
@@ -1513,9 +1613,8 @@ void Floorplan::pack_asf(int g) {
                 mods[mid_mir].w = mods[mid_rep].w;
                 mods[mid_mir].h = mods[mid_rep].h;
                 mods[mid_mir].rot = mods[mid_rep].rot;
-                rects.push_back(Rect(
-                    mods[mid_mir].x, mods[mid_mir].y, mods[mid_mir].w, mods[mid_mir].h
-                ));
+                rects.push_back(
+                    Rect(mods[mid_mir].x, mods[mid_mir].y, mods[mid_mir].w, mods[mid_mir].h));
                 max_x = max(max_x, mods[mid_mir].x + mods[mid_mir].w);
                 max_y = max(max_y, mods[mid_mir].y + mods[mid_mir].h);
             } else {
@@ -1523,9 +1622,8 @@ void Floorplan::pack_asf(int g) {
                 mods[mid_rep].x = -(mods[mid_rep].w - rw[j]) + shift;
                 mods[mid_rep].y = ry[i];
             }
-            rects.push_back(Rect(
-                mods[mid_rep].x, mods[mid_rep].y, mods[mid_rep].w, mods[mid_rep].h
-            ));
+            rects.push_back(
+                Rect(mods[mid_rep].x, mods[mid_rep].y, mods[mid_rep].w, mods[mid_rep].h));
             max_x = max(max_x, mods[mid_rep].x + mods[mid_rep].w);
             max_y = max(max_y, mods[mid_rep].y + mods[mid_rep].h);
         } else {
@@ -1545,18 +1643,16 @@ void Floorplan::pack_asf(int g) {
                 mods[mid_mir].w = mods[mid_rep].w;
                 mods[mid_mir].h = mods[mid_rep].h;
                 mods[mid_mir].rot = mods[mid_rep].rot;
-                rects.push_back(Rect(
-                    mods[mid_mir].x, mods[mid_mir].y, mods[mid_mir].w, mods[mid_mir].h
-                ));
+                rects.push_back(
+                    Rect(mods[mid_mir].x, mods[mid_mir].y, mods[mid_mir].w, mods[mid_mir].h));
                 max_x = max(max_x, mods[mid_mir].x + mods[mid_mir].w);
                 max_y = max(max_y, mods[mid_mir].y + mods[mid_mir].h);
             } else {
                 mods[mid_rep].x = rx[i];
                 mods[mid_rep].y = -(mods[mid_rep].h - rh[j]) + shift;
             }
-            rects.push_back(Rect(
-                mods[mid_rep].x, mods[mid_rep].y, mods[mid_rep].w, mods[mid_rep].h
-            ));
+            rects.push_back(
+                Rect(mods[mid_rep].x, mods[mid_rep].y, mods[mid_rep].w, mods[mid_rep].h));
             max_x = max(max_x, mods[mid_rep].x + mods[mid_rep].w);
             max_y = max(max_y, mods[mid_rep].y + mods[mid_rep].h);
         }
@@ -1577,13 +1673,20 @@ void Floorplan::pack() {
         packed_area = 0;
         return;
     }
-    if (iw.size() != grps.size()) iw.resize(grps.size());
-    if (ih.size() != grps.size()) ih.resize(grps.size());
-    if (island_x.size() != grps.size()) island_x.assign(grps.size(), 0);
-    if (island_y.size() != grps.size()) island_y.assign(grps.size(), 0);
-    if (island_top.size() != grps.size()) island_top.resize(grps.size());
-    if (island_bottom.size() != grps.size()) island_bottom.resize(grps.size());
-    if (group_dirty.size() != grps.size()) group_dirty.assign(grps.size(), 1);
+    if (iw.size() != grps.size())
+        iw.resize(grps.size());
+    if (ih.size() != grps.size())
+        ih.resize(grps.size());
+    if (island_x.size() != grps.size())
+        island_x.assign(grps.size(), 0);
+    if (island_y.size() != grps.size())
+        island_y.assign(grps.size(), 0);
+    if (island_top.size() != grps.size())
+        island_top.resize(grps.size());
+    if (island_bottom.size() != grps.size())
+        island_bottom.resize(grps.size());
+    if (group_dirty.size() != grps.size())
+        group_dirty.assign(grps.size(), 1);
 
     Contour c;
     int root = hb_root();
@@ -1593,7 +1696,8 @@ void Floorplan::pack() {
     double max_y = 0;
 
     while (!stk.empty()) {
-        int i = stk.top(); stk.pop();
+        int i = stk.top();
+        stk.pop();
         int id = hb[i].id;
 
         // Compute x from parent
@@ -1608,20 +1712,27 @@ void Floorplan::pack() {
         double w, h, y;
         if (id >= 0) {
             // Regular module
-            w = mods[id].w; h = mods[id].h;
+            w = mods[id].w;
+            h = mods[id].h;
             y = c.query(x, w);
-            mods[id].x = x; mods[id].y = y;
+            mods[id].x = x;
+            mods[id].y = y;
         } else {
             // Hierarchy node: pack ASF tree
             int g = -(id + 1);
             bool dirty = group_dirty[g];
-            if (dirty) pack_asf(g);
-            w = iw[g]; h = ih[g];
+            if (dirty)
+                pack_asf(g);
+            w = iw[g];
+            h = ih[g];
             if (w == 0) {
                 group_dirty[g] = 0;
                 island_x[g] = x;
                 island_y[g] = 0;
-                hb[i].px = x; hb[i].py = 0; hb[i].pw = 0; hb[i].ph = 0;
+                hb[i].px = x;
+                hb[i].py = 0;
+                hb[i].pw = 0;
+                hb[i].ph = 0;
                 goto push_children;
             }
             y = query_profile(c, x, island_bottom[g]);
@@ -1629,24 +1740,36 @@ void Floorplan::pack() {
             double dx = dirty ? x : (x - island_x[g]);
             double dy = dirty ? y : (y - island_y[g]);
             for (auto& pp : grps[g].pairs) {
-                mods[pp.a].x += dx; mods[pp.a].y += dy;
-                mods[pp.b].x += dx; mods[pp.b].y += dy;
+                mods[pp.a].x += dx;
+                mods[pp.a].y += dy;
+                mods[pp.b].x += dx;
+                mods[pp.b].y += dy;
             }
-            for (int m : grps[g].selfsym) { mods[m].x += dx; mods[m].y += dy; }
+            for (int m : grps[g].selfsym) {
+                mods[m].x += dx;
+                mods[m].y += dy;
+            }
             island_x[g] = x;
             island_y[g] = y;
             group_dirty[g] = 0;
         }
 
-        hb[i].px = x; hb[i].py = y; hb[i].pw = w; hb[i].ph = h;
-        if (id >= 0) c.update(x, w, y + h);
-        else         update_profile(c, x, island_top[-(id + 1)], y);
+        hb[i].px = x;
+        hb[i].py = y;
+        hb[i].pw = w;
+        hb[i].ph = h;
+        if (id >= 0)
+            c.update(x, w, y + h);
+        else
+            update_profile(c, x, island_top[-(id + 1)], y);
         max_x = max(max_x, x + w);
         max_y = max(max_y, y + h);
 
-        push_children:
-        if (hb[i].right != -1) stk.push(hb[i].right);
-        if (hb[i].left  != -1) stk.push(hb[i].left);
+    push_children:
+        if (hb[i].right != -1)
+            stk.push(hb[i].right);
+        if (hb[i].left != -1)
+            stk.push(hb[i].left);
     }
 
     packed_w = max_x;
@@ -1665,8 +1788,8 @@ double Floorplan::cost() const {
 void Floorplan::save() {
     sv_mods = mods;
     sv_grps = grps;
-    sv_hb   = hb;
-    sv_asf  = asf;
+    sv_hb = hb;
+    sv_asf = asf;
     sv_asf_pos = asf_pos;
     sv_iw = iw;
     sv_ih = ih;
@@ -1701,29 +1824,35 @@ void Floorplan::restore() {
 // ─── Perturbation operations ─────────────────────────────────────────────
 
 void Floorplan::op_swap_hb(mt19937& rng) {
-    if (hb.size() < 2) return;
+    if (hb.size() < 2)
+        return;
     int n1 = rand_node(hb, rng);
     int n2 = rand_node(hb, rng);
-    if (n1 == n2) return;
+    if (n1 == n2)
+        return;
     swap(hb[n1].id, hb[n2].id);
 }
 
 void Floorplan::op_move_hb(mt19937& rng) {
-    if (hb.size() < 2) return;
+    if (hb.size() < 2)
+        return;
     int n = rand_node(hb, rng);
     detach(hb, n);
     int t = n;
-    while (t == n) t = rand_node(hb, rng);
+    while (t == n)
+        t = rand_node(hb, rng);
     bool lft = (rng() & 1);
     attach(hb, n, t, lft);
 }
 
 void Floorplan::op_swap_asf_pairs(int g, mt19937& rng) {
     int np = grps[g].pairs.size();
-    if (np < 2) return;
+    if (np < 2)
+        return;
     int aid = rng() % np;
     int bid = rng() % np;
-    if (aid == bid) return;
+    if (aid == bid)
+        return;
     int a = asf_pos[g][aid];
     int b = asf_pos[g][bid];
     swap(asf[g][a].id, asf[g][b].id);
@@ -1734,10 +1863,12 @@ void Floorplan::op_swap_asf_pairs(int g, mt19937& rng) {
 void Floorplan::op_swap_asf_sel(int g, mt19937& rng) {
     int np = grps[g].pairs.size();
     int ns = grps[g].selfsym.size();
-    if (ns < 2) return;
+    if (ns < 2)
+        return;
     int aid = np + (rng() % ns);
     int bid = np + (rng() % ns);
-    if (aid == bid) return;
+    if (aid == bid)
+        return;
     int a = asf_pos[g][aid];
     int b = asf_pos[g][bid];
     swap(asf[g][a].id, asf[g][b].id);
@@ -1746,21 +1877,25 @@ void Floorplan::op_swap_asf_sel(int g, mt19937& rng) {
 }
 
 void Floorplan::op_move_asf_pair(int g, mt19937& rng) {
-    if (asf[g].size() < 2) return;
+    if (asf[g].size() < 2)
+        return;
     int np = grps[g].pairs.size();
-    if (np == 0) return;
+    if (np == 0)
+        return;
     int n = asf_pos[g][rng() % np];
     // Build valid targets (not n; and since we always attach as left child,
     // any node is safe — selfsym rightmost branch is unchanged)
     detach(asf[g], n);
     int t = n;
-    while (t == n) t = rand_node(asf[g], rng);
+    while (t == n)
+        t = rand_node(asf[g], rng);
     attach(asf[g], n, t, true); // always left child: keeps rightmost branch intact
     group_dirty[g] = 1;
 }
 
 void Floorplan::op_change_rep(int g, mt19937& rng) {
-    if (grps[g].pairs.empty()) return;
+    if (grps[g].pairs.empty())
+        return;
     int idx = rng() % grps[g].pairs.size();
     grps[g].pairs[idx].rep ^= 1; // flip 0↔1
     group_dirty[g] = 1;
@@ -1770,7 +1905,8 @@ void Floorplan::op_rotate(int g, mt19937& rng) {
     // Randomly pick a pair or selfsym and rotate (swap w,h)
     auto& grp = grps[g];
     int total = grp.pairs.size() + grp.selfsym.size();
-    if (total == 0) return;
+    if (total == 0)
+        return;
     int choice = rng() % total;
     if (choice < (int)grp.pairs.size()) {
         int mid_a = grp.pairs[choice].a;
@@ -1800,7 +1936,8 @@ void Floorplan::op_flip_sym(int g) {
         rotate_module(mods[pp.a]);
         rotate_module(mods[pp.b]);
     }
-    for (int m : grps[g].selfsym) rotate_module(mods[m]);
+    for (int m : grps[g].selfsym)
+        rotate_module(mods[m]);
     group_dirty[g] = 1;
 }
 
@@ -1819,31 +1956,52 @@ void Floorplan::perturb(mt19937& rng) {
     } else if (op < 50) {
         op_move_hb(rng);
     } else if (op < 65) {
-        if (ng == 0) { op_swap_hb(rng); return; }
+        if (ng == 0) {
+            op_swap_hb(rng);
+            return;
+        }
         int g = rng() % ng;
         op_swap_asf_pairs(g, rng);
     } else if (op < 75) {
-        if (ng == 0) { op_swap_hb(rng); return; }
+        if (ng == 0) {
+            op_swap_hb(rng);
+            return;
+        }
         int g = rng() % ng;
         op_move_asf_pair(g, rng);
     } else if (op < 85) {
-        if (ng == 0) { op_swap_hb(rng); return; }
+        if (ng == 0) {
+            op_swap_hb(rng);
+            return;
+        }
         int g = rng() % ng;
         op_change_rep(g, rng);
     } else if (op < 90) {
-        if (ng == 0) { op_swap_hb(rng); return; }
+        if (ng == 0) {
+            op_swap_hb(rng);
+            return;
+        }
         int g = rng() % ng;
         op_rotate(g, rng);
     } else if (op < 95) {
-        if (ng == 0) { op_swap_hb(rng); return; }
+        if (ng == 0) {
+            op_swap_hb(rng);
+            return;
+        }
         int g = rng() % ng;
         op_swap_asf_sel(g, rng);
     } else if (op < 97) {
-        if (ng == 0) { op_swap_hb(rng); return; }
+        if (ng == 0) {
+            op_swap_hb(rng);
+            return;
+        }
         int g = rng() % ng;
         op_flip_axis(g);
     } else {
-        if (ng == 0) { op_swap_hb(rng); return; }
+        if (ng == 0) {
+            op_swap_hb(rng);
+            return;
+        }
         int g = rng() % ng;
         op_flip_sym(g);
     }
