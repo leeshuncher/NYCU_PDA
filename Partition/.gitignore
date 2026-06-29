@@ -1,0 +1,8 @@
+.DS_Store
+.claude/
+
+Lab1
+ref_bin
+
+/*.out
+/run_outputs/

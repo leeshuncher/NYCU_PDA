@@ -1,0 +1,8 @@
+.DS_Store
+Legalizer
+*.def
+*.gp
+*.lef
+*.tcl
+*.svg
+__pycache__/

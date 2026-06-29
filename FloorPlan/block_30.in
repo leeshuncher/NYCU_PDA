@@ -1,0 +1,49 @@
+NumBlocks: 30
+b1 72 54
+b2 72 54
+b3 26 44
+b4 26 44
+b5 58 24
+b6 78 52
+b7 34 22
+b8 34 22
+b9 26 48
+b10 46 24
+b11 36 26
+b12 36 26
+b13 56 48
+b14 56 48
+b15 24 72
+b16 24 72
+b17 56 28
+b18 56 28
+b19 80 34
+b20 80 34
+b21 60 60
+b22 58 80
+b23 24 56
+b24 58 46
+b25 24 34
+b26 22 56
+b27 74 28
+b28 38 46
+b29 30 54
+b30 28 56
+Symmetry Group
+b1 b2
+b3 b4
+b5
+b6
+Symmetry Group
+b7 b8
+b9
+b10
+Symmetry Group
+b11 b12
+b13 b14
+b15 b16
+Symmetry Group
+b17 b18
+Symmetry Group
+b19 b20
+b21

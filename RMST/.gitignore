@@ -1,0 +1,7 @@
+RMST
+.tmp_*.out
+__pycache__/
+tests/__pycache__/
+.DS_Store
+*.tar
+*.dat
