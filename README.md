@@ -45,8 +45,3 @@ cd Placement
 cd RMST
 ./RMST <input.dat> <output.dat>
 ```
-
-## Code Style
-
-Run `clang-format -i` on changed C++ files before committing. The shared style
-is defined in `.clang-format`.
